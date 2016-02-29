@@ -156,12 +156,12 @@ describe('currency', () => {
 
     it('should format BTC', inject((Wallet, currency) => {
       let formatted = currency.formatCurrencyForView(amount, currency.bitCurrencies[0]);
-      expect(formatted).toEqual('0.12345679 BTC');
+      expect(formatted).toEqual('0.12345678 BTC');
     }));
 
     it('should format mBTC', inject((Wallet, currency) => {
       let formatted = currency.formatCurrencyForView(amount, currency.bitCurrencies[1]);
-      expect(formatted).toEqual('0.12346 mBTC');
+      expect(formatted).toEqual('0.12345 mBTC');
     }));
 
     it('should format bits', inject((Wallet, currency) => {
@@ -181,7 +181,7 @@ describe('currency', () => {
 
     it('should be able to format without the code', inject((Wallet, currency) => {
       let formatted = currency.formatCurrencyForView(amount, currency.bitCurrencies[0], false);
-      expect(formatted).toEqual('0.12345679');
+      expect(formatted).toEqual('0.12345678');
     }));
   });
 
