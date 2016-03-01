@@ -480,7 +480,7 @@ function SendCtrl($scope, $log, Wallet, Alerts, currency, $uibModalInstance, $ti
   $scope.guessAbsoluteFee = (size, feePerKb) => feePerKb * (size / 1000);
 
   $scope.updateDynamicFee = (fee) => {
-    $scope.transaction.fee = fee
+    $scope.transaction.fee = Math.ceil(fee)
     $scope.setPaymentFee()
   }
 

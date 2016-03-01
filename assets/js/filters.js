@@ -3,6 +3,7 @@
 angular
   .module('walletFilters', [])
   .filter('toBitCurrency', toBitCurrencyFilter)
+  .filter('ceil', ceilFilter)
   .filter('convert', convertFilter)
   .filter('escapeHtml', escapeHtmlFilter)
   .filter('getByProperty', getByPropertyFilter)
@@ -30,6 +31,12 @@ function convertFilter(Wallet, currency) {
     let conversion = currency.convertFromSatoshi(amount, curr);
     return currency.formatCurrencyForView(conversion, curr);
   };
+}
+
+function ceilFilter() {
+  return function(input) {
+    return Math.ceil(input)
+  }
 }
 
 function escapeHtmlFilter() {

@@ -60,9 +60,12 @@ button[disabled] {
         background: white;
         border-radius: 0px;
         border-bottom: 1px solid $border;
-        &:hover {
+        &:hover, &.active {
           background: white;
           color: $border;
+        }
+        &.active {
+          box-shadow: none;
         }
       }
     }
@@ -78,9 +81,9 @@ button[disabled] {
 @include button('danger', #E28081, white);
 @include button('warning', $security-yellow, white);
 
-@include button('primary-border', $blue, white, none, $blue);
-@include button('warning-border', $security-yellow, white, none, $security-yellow);
+@include button('success-border', $receive-green, white, none, $receive-green);
 @include button('danger-border', $send-red, white, none, $send-red);
+@include button('primary-border', $blue, white, none, $blue);
 
 .button-sm {
   padding: .3125em .625em;
