@@ -82,7 +82,7 @@ button[disabled] {
 @include button('warning', $security-yellow, white);
 
 @include button('success-border', $receive-green, white, none, $receive-green);
-@include button('danger-border', $send-red, white, none, $send-red);
+@include button('danger-border', $state-danger-text, white, none, $state-danger-text);
 @include button('primary-border', $blue, white, none, $blue);
 
 .button-sm {

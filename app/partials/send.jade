@@ -129,15 +129,15 @@
           span(translate="SMALL_FEE_WARNING" ng-show="blockIdx >= 6")
 
         span.fee-options.flex-between.mtm(ng-show="!sendForm.$invalid")
-          button.button-success-border(ng-click="updateDynamicFee(high)" ng-class="{ 'active': transaction.fee === (high | ceil) }")
+          button.button-success-border(ng-click="updateDynamicFee(high)" ng-class="{ 'active': transaction.fee === (high | floor) }")
             span(translate="PRIORITY")
             span{{high | toBitCurrency:btcCurrency:false}}
 
-          button.button-primary-border(ng-click="updateDynamicFee(mid)" ng-class="{ 'active': transaction.fee === (mid | ceil) }")
+          button.button-primary-border(ng-click="updateDynamicFee(mid)" ng-class="{ 'active': transaction.fee === (mid | floor) }")
             span(translate="MID")
             span{{mid | toBitCurrency:btcCurrency:false}}
 
-          button.button-danger-border(ng-click="updateDynamicFee(low)" ng-class="{ 'active': transaction.fee === (low | ceil) }")
+          button.button-danger-border(ng-click="updateDynamicFee(low)" ng-class="{ 'active': transaction.fee === (low | floor) }")
             span(translate="LOW")
             span{{low | toBitCurrency:btcCurrency:false}}
 

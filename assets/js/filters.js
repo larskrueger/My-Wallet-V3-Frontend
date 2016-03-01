@@ -3,7 +3,7 @@
 angular
   .module('walletFilters', [])
   .filter('toBitCurrency', toBitCurrencyFilter)
-  .filter('ceil', ceilFilter)
+  .filter('floor', floorFilter)
   .filter('convert', convertFilter)
   .filter('escapeHtml', escapeHtmlFilter)
   .filter('getByProperty', getByPropertyFilter)
@@ -33,9 +33,9 @@ function convertFilter(Wallet, currency) {
   };
 }
 
-function ceilFilter() {
+function floorFilter() {
   return function(input) {
-    return Math.ceil(input)
+    return Math.floor(input)
   }
 }
 
