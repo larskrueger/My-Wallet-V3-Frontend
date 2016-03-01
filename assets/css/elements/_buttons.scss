@@ -21,7 +21,7 @@ button[disabled] {
   }
 }
 
-@mixin button($name, $background:white, $color:white, $max-width:none) {
+@mixin button($name, $background:white, $color:white, $max-width:none, $border:none) {
   .btn:focus {
     color: $color;
   }
@@ -55,6 +55,16 @@ button[disabled] {
         background: darken($background, 5%);
         box-shadow: inset 0 2px 4px 0 darken($background, 10%);
       }
+      @if $border != none {
+        color: black;
+        background: white;
+        border-radius: 0px;
+        border-bottom: 1px solid $border;
+        &:hover {
+          background: white;
+          color: $border;
+        }
+      }
     }
   }
 }
@@ -66,6 +76,11 @@ button[disabled] {
 @include button('default', white, $black);
 @include button('info', $light-grey, white);
 @include button('danger', #E28081, white);
+@include button('warning', $security-yellow, white);
+
+@include button('primary-border', $blue, white, none, $blue);
+@include button('warning-border', $security-yellow, white, none, $security-yellow);
+@include button('danger-border', $send-red, white, none, $send-red);
 
 .button-sm {
   padding: .3125em .625em;

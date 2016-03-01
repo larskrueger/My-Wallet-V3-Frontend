@@ -4,7 +4,7 @@
   display: -webkit-flex; /* NEW - Safari 6.1+. iOS 7.1+, BB10 */
   display: flex;         /* NEW, Spec - Firefox, Chrome, Opera */
 }
-.flex, .flex-end, .flex-between, .flex-start, .flex-column, .flex-center, .flex-align-start, .flex-align-end, .flex-baseline, .flex-row {
+.flex, .flex-end, .flex-between, .flex-start, .flex-column, .flex-center, .flex-align-start, .flex-align-end, .flex-baseline, .flex-row, .flex-around {
   @extend %flex;
 }
 .flex-between { 

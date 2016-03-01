@@ -77,6 +77,19 @@
   }
 }
 
+#send {
+  .fee-options {
+    button {
+      span {
+        &:first-child {
+          font-size: 14px;
+        }
+        font-size: 11px;
+        display: block;
+      }
+    }
+  }
+}
 @media (max-width: 668px) {
   .miners-fee-selection {
     flex-direction: column;

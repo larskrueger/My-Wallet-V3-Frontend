@@ -479,6 +479,11 @@ function SendCtrl($scope, $log, Wallet, Alerts, currency, $uibModalInstance, $ti
 
   $scope.guessAbsoluteFee = (size, feePerKb) => feePerKb * (size / 1000);
 
+  $scope.updateDynamicFee = (fee) => {
+    $scope.transaction.fee = fee
+    $scope.setPaymentFee()
+  }
+
   $scope.getClosestBlock = (tx) => {
     dynamicFeeVectorP.then(estimate => {
       $timeout(() => {
@@ -498,6 +503,10 @@ function SendCtrl($scope, $log, Wallet, Alerts, currency, $uibModalInstance, $ti
 
         $scope.confirmationTime = ($scope.blockIdx + 1) * 10
         $scope.blockQueue = $scope.blockIdx + 1
+
+        $scope.high = $scope.guessAbsoluteFee(tx.transaction.sizeEstimate, estimate[0].fee);
+        $scope.mid = $scope.guessAbsoluteFee(tx.transaction.sizeEstimate, estimate[1].fee);
+        $scope.low = $scope.guessAbsoluteFee(tx.transaction.sizeEstimate, estimate[5].fee);
       })
 
     })

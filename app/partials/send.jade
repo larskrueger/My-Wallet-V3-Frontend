@@ -127,6 +127,20 @@
                          when="{'1': '{{block | translate}}', 'other': '{{blocks | translate}}' }")
             span ).
           span(translate="SMALL_FEE_WARNING" ng-show="blockIdx >= 6")
+
+        span.fee-options.flex-between.mtm(ng-show="!sendForm.$invalid")
+          button.button-primary-border(ng-click="updateDynamicFee(high)")
+            span(translate="PRIORITY")
+            span{{high | toBitCurrency:btcCurrency:false}}
+
+          button.button-warning-border(ng-click="updateDynamicFee(mid)")
+            span(translate="MID")
+            span{{mid | toBitCurrency:btcCurrency:false}}
+
+          button.button-danger-border(ng-click="updateDynamicFee(low)")
+            span(translate="LOW")
+            span{{low | toBitCurrency:btcCurrency:false}}
+
       //- QR Scanner 
       .form-group.row(ng-hide="!cameraIsOn")
         label.col-sm-2.col-xs-12(translate="QR")
