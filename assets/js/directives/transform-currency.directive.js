@@ -15,17 +15,14 @@ function transformCurrency(Wallet, currency) {
   return directive;
 
   function link(scope, elem, attrs, ctrl) {
-    if (!ctrl ||
-        scope.transformCurrency == null ||
-        scope.transformCurrency.code == null
-      ) return;
+    if (!ctrl) return;
 
     // Restrictions, updated based on currency type
-    const restrictions = {
+    const getRestrictions = () => ({
       max: currency.convertFromSatoshi(21e14, scope.transformCurrency),
       decimals: currency.decimalPlacesForCurrency(scope.transformCurrency),
       negative: false
-    };
+    });
 
     // Modifiers for imposing restrictions on viewValue
     const modifiers = {
@@ -45,6 +42,7 @@ function transformCurrency(Wallet, currency) {
     // View parser
     scope.parseToModel = (viewValue) => {
       let modifiedInput = viewValue;
+      let restrictions = getRestrictions();
 
       for (let key in modifiers) {
         let mod = modifiers[key];
@@ -63,6 +61,7 @@ function transformCurrency(Wallet, currency) {
     // Model formatter
     scope.formatToView = (modelValue) => {
       if (modelValue === null || modelValue === '') return null;
+      let restrictions = getRestrictions();
       let fiat = currency.convertFromSatoshi(modelValue, scope.transformCurrency);
       let factor = Math.pow(10, restrictions.decimals);
       let formatted = (Math.floor(fiat * factor) / factor).toFixed(restrictions.decimals);

@@ -44,51 +44,13 @@
           |:
         .col-sm-10.col-xs-12
           .flex-column(ng-class="{'advanced-recipient-row': advanced}" ng-repeat="item in transaction.destinations track by $index")
-            p.form-control-static(ng-hide="originsLoaded")
-              img(src="img/spinner.gif")
-            div(ng-show="originsLoaded" ng-class="{'has-error': sendForm['destinations' + $index].$invalid && sendForm['destinations' + $index].$touched && transaction.destinations[$index].address !== ''}")
-              destination-input(
-                name="{{ 'destinations' + $index }}"
-                ng-model="transaction.destinations[$index]"
-                ng-model-options="{ updateOn: 'blur' }"
-                ng-change="updateToLabel(); checkForSameDestination(); refreshTxProposal()")
-            .has-error
-              span.help-block(translate="BITCOIN_ADDRESS_INVALID" ng-show="sendForm['destinations' + $index].$error.isValidAddress && sendForm['destinations' + $index].$touched && transaction.destinations[$index].address !== ''")
-              span.help-block(translate="SAME_DESTINATION" ng-show="sendForm['destinations' + $index].$error.isNotEqual")
-            //- Amount
-            div.flex-center.recipient-currency.mtl(ng-class="{'has-error': hasAmountError($index) || hasInsufficientError($index) }")
-              .mrl.flex-1
-                .flex-center.border-bottom
-                  span.mrm {{ btcCurrency.code }}:
-                  input.form-control.no-border(
-                    type="number"
-                    ng-model="transaction.amounts[$index]"
-                    name="{{'amounts' + $index}}"
-                    tabindex="1"
-                    transform-currency="btcCurrency"
-                    placeholder="0"
-                    min="1"
-                    max="2100000000000000"
-                    ng-change="validateAmounts(); setPaymentAmount()"
-                    required
-                  )
-              i.ti-arrows-horizontal.h4.aaa.prm
-              .flex-1
-                .flex-center.border-bottom
-                  span.mrm {{ fiatCurrency.code }}:
-                  input.form-control.no-border(
-                    type="number"
-                    ng-model="transaction.amounts[$index]"
-                    name="{{'amountsFiat' + $index}}"
-                    tabindex="1"
-                    transform-currency="fiatCurrency"
-                    placeholder="0"
-                    ng-change="validateAmounts(); setPaymentAmount()"
-                    required
-                  )
-              a.mlm.button-danger.type-sm.button-sm(ng-click="removeDestination($index)" ng-hide="$first && $last")
-                i.ti-close.mrm.type-xs
-                span(translate="REMOVE")
+            destination-input(
+              ng-model="transaction.destinations[$index]"
+              ng-model-options="{ updateOn: 'blur' }"
+              ng-change="updateToLabel(); checkForSameDestination(); refreshTxProposal()")
+            a.mlm.button-danger.type-sm.button-sm(ng-click="removeDestination($index)" ng-hide="$first && $last")
+              i.ti-close.mrm.type-xs
+              span(translate="REMOVE")
           .has-error
             span.help-block(ng-show="hasInsufficientError(0)")
               span(translate="TOTAL_AVAILABLE" ng-show="!advanced")

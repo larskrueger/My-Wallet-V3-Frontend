@@ -21,15 +21,19 @@ function destinationInput($rootScope, $timeout, Wallet) {
     scope.browserWithCamera = $rootScope.browserWithCamera;
     scope.accounts = Wallet.accounts().filter(a => a.active);
 
-    let format = (a, type) => ({
-      label     : a.label || a.address || '',
-      address   : a.address || '',
-      index     : a.index,
-      balance   : a.balance,
-      active    : a.active,
-      archived  : a.archived,
-      type      : type
-    });
+    scope.fiatCurrency = Wallet.settings.currency;
+    scope.btcCurrency = Wallet.settings.btcCurrency;
+
+    let format = (a, type) => {
+      let formatted = {
+        label   : a.label || a.address,
+        amount  : scope.model.amount,
+        type    : type
+      };
+      let addrOrIndex = type === 'Accounts' ? 'index' : 'address';
+      formatted[addrOrIndex] = a[addrOrIndex];
+      return formatted;
+    };
 
     scope.onAddressScan = (result) => {
       let address = Wallet.parsePaymentRequest(result)
