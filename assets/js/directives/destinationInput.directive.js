@@ -27,7 +27,7 @@ function destinationInput($rootScope, $timeout, Wallet) {
     let format = (a, type) => {
       let formatted = {
         label   : a.label || a.address,
-        amount  : scope.model.amount,
+        amount  : a.amount || '',
         type    : type
       };
       let addrOrIndex = type === 'Accounts' ? 'index' : 'address';
