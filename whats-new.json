@@ -1,0 +1,12 @@
+[
+  {
+    "title": "What's New!",
+    "date": 1459697821925,
+    "desc": "We now have a \"What's New\" section where we'll let you know about all the cool changes we've been making to our wallet."
+  },
+  {
+    "title": "Dynamic Fees",
+    "date": 1458920233357,
+    "desc": "Never worry about unconfirmed transactions, we'll automatically suggest the best fee for you."
+  }
+]

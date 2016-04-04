@@ -83,6 +83,11 @@ if (dist) {
   app.set('views', __dirname);
 }
 
+rootApp.get('/whats-new', function (req, res) {
+  var whatsNewJSON = require('./whats-new.json');
+  res.json(whatsNewJSON);
+});
+
 rootApp.use(function (req, res) {
   res.status(404).send('<center><h1>404 Not Found</h1></center>');
 });
