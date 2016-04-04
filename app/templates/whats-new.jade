@@ -1,5 +1,7 @@
-li.plm(ng-repeat="feat in feats | orderBy:'-date' track by $index")
-  h4 {{ feat.title }}
-  small {{ feat.date | date:dd/mm/yyyy }}
-  p {{ feat.desc }}
-  span.blue.pointer Read more...
+div
+  .center-align(ng-hide="feats.length")
+    img(src="img/spinner.gif")
+  li.plm(ng-repeat="feat in feats | orderBy:'-date' track by $index")
+    h4 {{ feat.title }}
+    small {{ feat.date | date }}
+    p {{ feat.desc }}

@@ -36,7 +36,7 @@
 
 .whats-new {
   .popover-content {
-    height: 300px;
+    max-height: 300px;
     overflow: scroll;
   }
   .whats-new-icon {
