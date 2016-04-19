@@ -24,8 +24,8 @@
     > div, textarea {
       @extend .mll;
       @media (min-width: 768px) {
-        max-width: 420px;
-        min-width: 420px;
+        max-width: 460px;
+        min-width: 460px;
       }
     }
     @media (max-width: 768px) {
@@ -37,6 +37,22 @@
         min-width: auto;
         max-width: none;
         margin-left: 0px;
+      }
+    }
+  }
+  // when an address is too long
+  .ui-select-choices-row-inner {
+    > span {
+      > div {
+        overflow: hidden;
+        > span:first-child {
+          float: left;
+          overflow: auto;
+          max-width: 220px;
+          margin-bottom: -30px;
+          padding-bottom: 30px;
+          display: inline-block;
+        }
       }
     }
   }
