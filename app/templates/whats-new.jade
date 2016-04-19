@@ -1,7 +1,7 @@
 div
   .center-align(ng-hide="feats.length")
     img(src="img/spinner.gif")
-  li.plm(ng-repeat="feat in feats | orderBy:'-date' track by $index")
+  li(ng-repeat="feat in feats | orderBy:'-date' track by $index")
     h4 {{ feat.title }}
-    small {{ feat.date | date }}
+      small.aaa.mlm {{ feat.date | date }}
     p {{ feat.desc }}
