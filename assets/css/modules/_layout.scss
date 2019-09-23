@@ -1,15 +1,26 @@
+
 .wallet-container {
+  width: 100%;
   height: 100%;
-  position: relative;
+  flex-grow: 1;
+  display: flex;
+  min-height: 0;
+  @media (min-width: 768px) {
+    overflow: hidden;
+  }
 }
 
 .left-nav {
-  position: absolute;
-  width: 270px;
-  height: 100%;
+  flex: 0 0 270px;
   padding: 15px;
-  background: $light-blue;
+  background: $grey;
   border-right: 1px solid $border-grey;
+  @media (max-height: 550px) {
+    overflow: auto;
+  }
+  @media (max-width: 1024px) {
+    height: calc(100% - 50px);
+  }
   .active-accounts{
     margin-bottom: 30px;
   }
@@ -17,86 +28,139 @@
     margin-bottom: 30px;
   }
   .side-box {
-    background-color: $light-grey;
-    border: 1px solid $grey;
+    background-color: $grey;
+    border: 1px solid $border-grey;
   }
 }
+
+.main-container {
+  width: 100%;
+  height: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  @media (max-width: 767px) {
+    display: block !important;
+  }
+}
+
 .top-view {
-  position: absolute;
-  width: calc(100% - 270px);
-  z-index: 1;
   background: white;
-  margin-left: 270px;
   border-bottom: 1px solid $border-grey;
   padding: 0 30px;
   height: 115px;
   .heavy {
-    h1 { font-size: 2.3em; }
     img.spinner {
       height: 11px;
     }
   }
-  .align-offset { top: -7px; }
+  .reg {
+    font-size: 0.5em;
+    font-weight: 300;
+  }
+  @media (max-width: 991px) {
+    padding: 0 15px;
+  }
 }
 
-.main-container {
+.right-container {
   background: white;
-  position: relative;
-  left: 270px;
-  top: 115px;
+  flex-grow: 1;
+  height: 100%;
   overflow-y: scroll;
   overflow-x: hidden;
-  width: calc(100% - 270px);
-  height: calc(100% - 175px); // make viewport smaller for overflow-y to work
+  -webkit-overflow-scrolling: touch; // smooth scrolling on ios
 }
 
 .overflow-scroll {
-  overflow-y: scroll !important;
+  overflow-y: auto !important;
   height: 100%;
 }
 
-@media (max-width: 768px) {
+.overflow-hidden {
+  overflow: hidden;
+}
+
+@media (max-width: 1024px) {
   .left-nav {
+    position: absolute;
     left: -270px;
+    width: 270px;
     z-index: 11; //just enough to be visible
     transition: all .3s ease-in-out;
-    top: 0px;
+    &.toggled { left: 0; }
   }
-  .left-nav.toggled { left: 0; }
   .top-view {
     width: 100%;
     position: relative;
     margin-left: 0;
-    height: 95px;
-    top: 0px;
+    height: 150px;
   }
-  .transactions { top: 0; }
-  .main-container {
-    left: 0;
-    top: 0;
+  .right-container {
     width: 100%;
   }
 }
 
-.rel { position: relative; }
+.hide { display: none; }
+.invisible { visibility: hidden; opacity: 0; }
 
-.brdrn { border-radius: 0px !important; }
-
-@media (max-width: 992px) {
-  .top-view .heavy h1 { font-size: 1.75em; }
-  .top-view .heavy p { font-size: 1em; }
+@media (max-width: 991px) {
+  .top-view .heavy p,
+  .top-view .heavy h1 { font-size: 24px; }
 }
 
-@media (max-width: 768px) {
-  .top-view .my-wallet { display: none; }
-  .top-view .heavy h1 { font-size: 1.25em; }
-  .top-view .heavy p { font-size: .9em; }
-  .top-view .heavy { top: -6px; }
+@media (max-width: 767px) {
+  .top-view .heavy p { font-size: 20px; }
+  .top-view .heavy p.f-28 { font-size: 24px; }
 }
 
 @media (max-width:480px) {
-  .main-container {
+  .right-container {
     background: transparent;
-    height: calc(100% - 145px);
+  }
+}
+
+.container-max-width {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.container-fluid {
+  padding-right: 5px;
+  padding-left: 5px;
+}
+
+@media (min-width: 768px) {
+  .container-fluid {
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+}
+
+.clear-left { clear: left; }
+.clear-right { clear: right; }
+
+.width-100 {
+  @media (max-width: 991px) {
+    width: 100%;
+  }
+}
+
+.vat { vertical-align: top; }
+
+.bottom-right-footer {
+  padding: 15px 30px;
+  background-color: $grey-transparent;
+  @media (max-width: 767px) {
+    left: 0px;
+  }
+}
+
+.abs {
+  .bottom-right-footer {
+    @extend .pos-abs;
+    width: 100%;
+    bottom: 0;
+    left: 0;
   }
 }

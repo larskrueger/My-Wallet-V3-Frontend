@@ -2,49 +2,120 @@ angular
   .module('walletApp')
   .controller('NavigationCtrl', NavigationCtrl);
 
-function NavigationCtrl ($rootScope, $scope, Wallet, currency, SecurityCenter, $translate, $cookies, $state, filterFilter, $interval, $timeout, Alerts) {
+function NavigationCtrl ($scope, $window, $rootScope, BrowserHelper, $state, $interval, $timeout, MyWalletHelpers, localStorageService, $q, $uibModal, Wallet, Alerts, currency, whatsNew, MyWallet, tradeStatus, Env, Ethereum, ShapeShift) {
   $scope.status = Wallet.status;
-  $scope.security = SecurityCenter.security;
   $scope.settings = Wallet.settings;
+  $scope.popover = { isOpen: false };
 
-  $scope.logout = () => {
-    if (!Wallet.isSynchronizedWithServer()) {
-      Alerts.confirm('CHANGES_BEING_SAVED', {}, 'top').then($scope.doLogout);
-    } else {
-      $scope.doLogout();
-    }
+  const whatsNewDateCutoff = 7.884e+9; // ~3 months
+  const lastViewedDefaultTime = 1231469665000;
+  $scope.whatsNewTemplate = 'templates/whats-new.pug';
+  $scope.lastViewedWhatsNew = null;
+
+  $rootScope.isSubscribed = localStorageService.get('subscribed');
+  $scope.getTheme = () => $scope.settings.theme;
+
+  let asyncAssert = (value) => value ? $q.resolve(value) : $q.reject();
+
+  $scope.fetchLastViewed = () =>
+    asyncAssert($scope.metaData && !Wallet.settings.secondPassword)
+      .then(() =>
+        $scope.metaData.fetch()
+          .then(asyncAssert)
+          .then(res => res.lastViewed)
+      )
+      .catch(() => localStorageService.get('whatsNewViewed'))
+      .then(value => value || lastViewedDefaultTime);
+
+  $scope.viewedWhatsNew = () => {
+    let lastViewed = $scope.lastViewedWhatsNew = Date.now();
+    asyncAssert($scope.metaData && !Wallet.settings.secondPassword)
+      .then(() => $scope.metaData.update({ lastViewed }))
+      .finally(() => localStorageService.set('whatsNewViewed', lastViewed));
   };
 
-  $scope.openZeroBlock = () => {
-    const win = window.open('https://zeroblock.com', '_blank');
-    win.focus();
-  };
+  $scope.getNLatestFeats = (feats = [], lastViewed) => (
+    (lastViewed && feats.filter(({ date }) => date > lastViewed).length) || 0
+  );
 
-  $scope.openBCmarkets = () => {
-    const win = window.open('https://markets.blockchain.info/', '_blank');
-    win.focus();
-  };
-
-//  #################################
-//  #           Private             #
-//  #################################
-
-  $scope.doLogout = () => {
-    Alerts.confirm('ARE_YOU_SURE_LOGOUT', {}, 'top').then(() => {
-      $scope.uid = null;
-      $scope.password = null;
-      $cookies.remove('password');
-//      $cookies.remove('uid') // Pending a 'Forget Me feature'
-
-      $state.go('wallet.common.transactions', {
-        accountIndex: ''
-      });
-      Wallet.logout();  // Refreshes the browser, so won't return
+  $scope.subscribe = () => {
+    $uibModal.open({
+      templateUrl: 'partials/subscribe-modal.pug',
+      windowClass: 'bc-modal initial',
+      controller: 'SubscribeCtrl'
     });
   };
 
-  const intervalTime = 15 * 60 * 1000;
+  $rootScope.logout = () => {
+    let isSynced = Wallet.isSynchronizedWithServer();
+    let needsBackup = !Wallet.status.didConfirmRecoveryPhrase;
+
+    let options = (ops) => angular.merge({ friendly: true, modalClass: 'top' }, ops);
+    let saidNoThanks = (e) => e === 'cancelled' ? $q.resolve() : $q.reject();
+    let hasNotSeen = (id) => !localStorageService.get(id);
+    let rememberChoice = (id) => () => localStorageService.set(id, true);
+
+    let goToBackup = () => $q.all([$state.go('wallet.common.security-center', {promptBackup: true}), $q.reject('backing_up')]);
+    let openSurvey = () => { BrowserHelper.safeWindowOpen('https://blockchain.co1.qualtrics.com/SE/?SID=SV_7PupfD2KjBeazC5'); };
+
+    let remindBackup = () =>
+      Alerts.confirm('BACKUP_REMINDER', options({ cancel: 'CONTINUE_LOGOUT', action: 'VERIFY_RECOVERY_PHRASE' }))
+        .then(goToBackup, saidNoThanks).then(rememberChoice('backup-reminder'));
+
+    let promptSurvey = () =>
+      Alerts.confirm('SURVEY_CONFIRM', options({ cancel: 'NO_THANKS' }))
+        .then(openSurvey, saidNoThanks).then(rememberChoice('logout-survey-1515433556478'));
+
+    $q.resolve(isSynced || Alerts.saving())
+      .then(() => {
+        if (needsBackup && hasNotSeen('backup-reminder')) return remindBackup();
+        else if (hasNotSeen('logout-survey-1515433556478')) return promptSurvey();
+      })
+      .then(() => Wallet.logout());
+  };
+
   $interval(() => {
-    if (Wallet.status.isLoggedIn) currency.fetchExchangeRate();
-  }, intervalTime);
+    if (Wallet.status.isLoggedIn) {
+      currency.fetchAllRates(Wallet.settings.currency);
+    }
+  }, 15 * 60000);
+
+  if ($scope.status.isLoggedIn) {
+    if (Wallet.goal.firstTime) {
+      $scope.viewedWhatsNew();
+    } else {
+      const watcher = $scope.$watch('status.didUpgradeToHd', (didUpgrade) => {
+        if (!didUpgrade) return;
+        watcher();
+        if (!Wallet.settings.secondPassword) $scope.metaData = MyWallet.wallet.metadata(2);
+        $scope.fetchLastViewed().then(lastViewed => { $scope.lastViewedWhatsNew = lastViewed; });
+      });
+    }
+  }
+
+  $q.all([Env, tradeStatus.canTrade()]).then(([env, canTrade]) => {
+    let now = Date.now();
+    let email = MyWallet.wallet.accountInfo.email;
+    let internalEmail = email.indexOf('@blockchain.com') > -1 || email.indexOf('@sfox.com') > -1;
+    let invitedEmail = MyWalletHelpers.isStringHashInFraction(email, env.partners.sfox.showBuyFraction);
+
+    $scope.filterFeatures = (feat) => (
+      (feat.title !== 'SFOX.BUY_BITCOIN' || canTrade && MyWallet.wallet.accountInfo.countryCodeGuess === 'US' && (internalEmail || invitedEmail)) &&
+      (feat.title !== 'SFOX.SELL_BITCOIN' || canTrade && MyWallet.wallet.accountInfo.countryCodeGuess === 'US') &&
+      (feat.title !== 'RECURRING_BUY' || canTrade) &&
+      (feat.title !== 'BUY_BITCOIN' || canTrade) &&
+      (feat.title !== 'SELL_BITCOIN' || (canTrade && MyWallet.wallet.external.shouldDisplaySellTab(Wallet.user.email, env, 'coinify'))) &&
+      (feat.title !== 'ETHER_SEND_RECEIVE' || Ethereum.userHasAccess) &&
+      (feat.title !== 'BTC_ETH_EXCHANGE' || ShapeShift.userHasAccess)
+    );
+
+    $scope.filterByDate = (f) => (now - f.date) < whatsNewDateCutoff;
+    $scope.feats = whatsNew.filter($scope.filterFeatures).filter($scope.filterByDate);
+  });
+
+  $scope.$watch('lastViewedWhatsNew', (lastViewed) => $timeout(() => {
+    $scope.nLatestFeats = $scope.getNLatestFeats($scope.feats, lastViewed);
+  }));
+
+  $scope.goTo = (ref) => { $state.go(ref); $scope.popover.isOpen = false; };
 }

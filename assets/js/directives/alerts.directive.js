@@ -1,5 +1,5 @@
 angular
-  .module('walletApp')
+  .module('walletDirectives')
   .directive('alerts', alerts);
 
 function alerts (Alerts) {
@@ -9,10 +9,9 @@ function alerts (Alerts) {
       alertsContext: '=context'
     },
     template: `
-      <uib-alert ng-repeat="alert in alerts" type="{{::alert.type}}" close="alert.close()">
+      <uib-alert ng-repeat="alert in alerts" type="{{::alert.type}}" close="alert.close()" ng-click="alert.action($event)">
         {{::alert.msg}}
-      </uib-alert>
-    `,
+      </uib-alert>`,
     link: link
   };
   return directive;

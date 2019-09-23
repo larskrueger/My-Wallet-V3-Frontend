@@ -1,5 +1,5 @@
 angular
-  .module('walletApp')
+  .module('walletDirectives')
   .directive('bcAsyncInput', bcAsyncInput);
 
 bcAsyncInput.$inject = ['$timeout', 'Wallet'];
@@ -13,6 +13,7 @@ function bcAsyncInput ($timeout, Wallet) {
       ngModel: '=',
       validator: '=',
       onSave: '=',
+      onFocus: '=',
       onCancel: '=',
       onChange: '=',
       actionTitle: '=',
@@ -26,7 +27,7 @@ function bcAsyncInput ($timeout, Wallet) {
     },
     transclude: true,
     templateUrl: (elem, attrs) => {
-      let templ = attrs.custom ? 'transclude.jade' : 'bc-async-input.jade';
+      let templ = attrs.custom ? 'transclude.pug' : 'bc-async-input.pug';
       return `templates/${templ}`;
     },
     link: link
@@ -36,9 +37,10 @@ function bcAsyncInput ($timeout, Wallet) {
   function link (scope, elem, attrs, ctrl, transclude) {
     scope.isRequired = attrs.isRequired != null;
     scope.inline = attrs.inline != null;
+    scope.button = attrs.button || 'SAVE';
 
     scope.type = scope._type || 'text';
-    scope.buttonClass = scope._buttonClass || 'button-primary btn-small';
+    scope.buttonClass = scope._buttonClass || 'button-primary button-sm';
 
     scope.user = Wallet.user;
     scope.status = {
@@ -46,17 +48,18 @@ function bcAsyncInput ($timeout, Wallet) {
       saving: false
     };
 
-    if (attrs.editing != null) scope.status.edit = true;
-
-    scope.form = {
-      newValue: scope.ngModel
-    };
-
     scope.edit = () => {
       // finds and focuses on the text input field
       // a brief timeout is necessary before trying to focus
       $timeout(() => { elem.find('input')[0].focus(); }, 50);
       scope.status.edit = 1;
+    };
+
+    if (attrs.editing != null) scope.status.edit = true;
+    if (scope.status.edit) { scope.edit(); }
+
+    scope.form = {
+      newValue: scope.ngModel
     };
 
     scope.focus = () => {
@@ -74,15 +77,10 @@ function bcAsyncInput ($timeout, Wallet) {
         scope.ngModel = scope.form.newValue;
         if (!attrs.custom) scope.bcAsyncForm.$setPristine();
 
-        scope.$root.$safeApply(scope);
-
-        // Fixes issue: hit enter after changing PBKDF2 iterations
-        // when 2nd password is enabled
-        scope.$evalAsync(() => {
+        $timeout(() => {
           scope.status.saving = false;
           if (!attrs.editing) scope.status.edit = false;
         });
-        scope.$root.$safeApply(scope);
       };
 
       let error = () => {

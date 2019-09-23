@@ -2,7 +2,7 @@ angular
   .module('walletApp')
   .controller('RecoverFundsCtrl', RecoverFundsCtrl);
 
-function RecoverFundsCtrl ($scope, $rootScope, $state, $timeout, $translate, Wallet, Alerts) {
+function RecoverFundsCtrl ($scope, AngularHelper, $state, $timeout, $translate, localStorageService, Wallet, Alerts, Ethereum) {
   $scope.isValidMnemonic = Wallet.isValidBIP39Mnemonic;
   $scope.currentStep = 1;
   $scope.fields = {
@@ -13,24 +13,31 @@ function RecoverFundsCtrl ($scope, $rootScope, $state, $timeout, $translate, Wal
     bip39phrase: ''
   };
 
+  $scope.browser = {disabled: true};
+
   $scope.performImport = () => {
     $scope.working = true;
 
-    const success = (wallet) => {
+    const success = (result) => {
+      localStorageService.set('session', result.sessionToken);
+      localStorageService.set('guid', result.guid);
+
       $scope.working = false;
       $scope.nextStep();
-      $rootScope.$safeApply();
+      AngularHelper.$safeApply();
 
       const loginSuccess = () => {
-        Alerts.displaySuccess('Successfully recovered wallet!');
+        if (Ethereum.userHasAccess) Ethereum.initialize();
+        $state.go('wallet.common.home');
       };
+
       const loginError = (err) => {
-        console.error(err);
+        Alerts.displayError(err);
       };
+
       $timeout(() => {
-        $state.go('public.login-uid', {uid: wallet.guid});
         Wallet.login(
-          wallet.guid, wallet.password, null, null, loginSuccess, loginError
+          result.guid, result.password, null, null, loginSuccess, loginError
         );
       }, 4000);
     };
@@ -40,13 +47,14 @@ function RecoverFundsCtrl ($scope, $rootScope, $state, $timeout, $translate, Wal
       Alerts.displayError(err || 'RECOVERY_ERROR');
     };
 
-    Wallet.my.recoverFromMnemonic(
-      $scope.fields.email,
-      $scope.fields.password,
-      $scope.fields.mnemonic,
-      $scope.fields.bip39phrase,
-      success, error
-    );
+    $timeout(() => {
+      Wallet.my.recoverFromMnemonic(
+        $scope.fields.email,
+        $scope.fields.password,
+        $scope.fields.mnemonic,
+        $scope.fields.bip39phrase,
+        success, error);
+    }, 250);
   };
 
   $scope.getMnemonicLength = () => {
@@ -54,8 +62,17 @@ function RecoverFundsCtrl ($scope, $rootScope, $state, $timeout, $translate, Wal
   };
 
   $scope.nextStep = () => {
-    $scope.currentStep++;
-    $scope.fields.confirmation = '';
+    $scope.working = true;
+    $timeout(() => {
+      if (!Wallet.my.browserCheck()) {
+        $scope.browser.disabled = true;
+        $scope.browser.msg = $translate.instant('UNSUITABLE_BROWSER');
+      } else {
+        $scope.currentStep++;
+        $scope.fields.confirmation = '';
+      }
+      $scope.working = false;
+    }, 250);
   };
 
   $scope.goBack = () => {

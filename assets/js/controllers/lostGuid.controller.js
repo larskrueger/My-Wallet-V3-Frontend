@@ -2,7 +2,7 @@ angular
   .module('walletApp')
   .controller('LostGuidCtrl', LostGuidCtrl);
 
-function LostGuidCtrl ($scope, $rootScope, $http, $translate, WalletNetwork, Alerts) {
+function LostGuidCtrl ($scope, AngularHelper, $http, $translate, WalletNetwork, Alerts, $sce, Wallet) {
   $scope.currentStep = 1;
   $scope.fields = {
     email: '',
@@ -10,9 +10,14 @@ function LostGuidCtrl ($scope, $rootScope, $http, $translate, WalletNetwork, Ale
   };
 
   $scope.refreshCaptcha = () => {
-    let time = new Date().getTime();
-    $scope.captchaSrc = $rootScope.rootURL + `kaptcha.jpg?timestamp=${time}`;
-    $scope.fields.captcha = '';
+    WalletNetwork.getCaptchaImage().then((data) => {
+      let url = URL.createObjectURL(data.image);
+      $sce.trustAsResourceUrl(url);
+      $scope.captchaSrc = url;
+      $scope.sessionToken = data.sessionToken;
+      $scope.fields.captcha = '';
+      AngularHelper.$safeApply();
+    });
   };
 
   $scope.sendReminder = () => {
@@ -20,8 +25,8 @@ function LostGuidCtrl ($scope, $rootScope, $http, $translate, WalletNetwork, Ale
     let success = (message) => {
       $scope.working = false;
       $scope.currentStep = 2;
-      Alerts.displaySuccess(message);
-      $rootScope.$safeApply();
+      Alerts.displaySuccess('EMAIL_SENT');
+      AngularHelper.$safeApply();
     };
 
     let error = (error) => {
@@ -39,13 +44,13 @@ function LostGuidCtrl ($scope, $rootScope, $http, $translate, WalletNetwork, Ale
       }
 
       $scope.refreshCaptcha();
-      $rootScope.$safeApply();
+      AngularHelper.$safeApply();
     };
 
     $scope.form.$setPristine();
     $scope.form.$setUntouched();
 
-    WalletNetwork.recoverGuid($scope.fields.email, $scope.fields.captcha).then(success).catch(error);
+    WalletNetwork.recoverGuid($scope.sessionToken, $scope.fields.email, $scope.fields.captcha).then(success).catch(error);
   };
 
   $scope.refreshCaptcha();

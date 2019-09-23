@@ -1,17 +1,33 @@
-# MyWallet V3 Frontend [![Build Status](https://travis-ci.org/blockchain/My-Wallet-V3-Frontend.png?branch=master)](https://travis-ci.org/blockchain/My-Wallet-V3-Frontend) [![Coverage Status](https://coveralls.io/repos/blockchain/My-Wallet-V3-Frontend/badge.svg?branch=master&service=github)](https://coveralls.io/github/blockchain/My-Wallet-V3-Frontend?branch=master)
+# Deprecated: use https://github.com/blockchain/blockchain-wallet-v4-frontend instead
 
-An AngularJS bitcoin web wallet powered by [My-Wallet-V3](https://github.com/blockchain/My-Wallet-V3).
+# Blockchain.info Wallet 
+[![Build Status](https://travis-ci.org/blockchain/My-Wallet-V3-Frontend.svg?branch=master)](https://travis-ci.org/blockchain/My-Wallet-V3-Frontend) 
+[![Coverage Status](https://coveralls.io/repos/blockchain/My-Wallet-V3-Frontend/badge.svg?branch=master&service=github)](https://coveralls.io/github/blockchain/My-Wallet-V3-Frontend?branch=master)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
-This is the new and improved wallet. You can see it at [alpha.blockchain.info](https://alpha.blockchain.info/). For the original wallet at [blockchain.info](https://blockchain.info/) please see [this repository](https://github.com/blockchain/My-Wallet) or [contact support](http://blockchain.zendesk.com/).
+Be Your Own Bank at [blockchain.info/wallet](https://blockchain.info/wallet). Please [contact support](https://support.blockchain.com) if you have any issues using the wallet.
 
-## Setup
+## Run the wallet on your own computer
+
+The normal and easiest way to use our wallet is to go to [blockchain.info/wallet](https://blockchain.info/wallet). However if you like more control over the exact code that runs in your browser, you can download the source code and run the wallet from a simple server on your own machine. Here's how:
+
+ 1. Install [Node.js](http://nodejs.org/)
+ 2. `git clone git@github.com:blockchain/My-Wallet-V3-Frontend.git -b v1.11.11 --single-branch --depth 1`
+ 3. `make server`
+
+Login to your existing wallet or create a new one at `http://localhost:8080/`.
+
+You can replace `v1.11.11` with any tagged version you like, but we recommend always using the latest [release](https://github.com/blockchain/My-Wallet-V3-Frontend/releases). The versions marked as pre-release have not gone through extensive internal testing yet.
+
+Note that the wallet itself is still stored on Blockchain.info servers. It is encrypted with your password. The wallet also uses the Blockchain.info servers to show you your balance, notify you of new payments, submit transactions, etc.
+
+## About
+
+The frontend code in this repository uses AngularJS. The Bitcoin specific tasks are handled by [My-Wallet-V3](https://github.com/blockchain/My-Wallet-V3), which is included via Bower.
+
+## Develop
 
 Make sure you have [Node.js](http://nodejs.org/) installed.
-
-Some NodeJS components need to be installed system wide:
-```sh
-npm install -g grunt-cli coffee-script
-```
 
 You also need Sass (use `sudo` if you're not using a [Ruby version manager](https://rvm.io)):
 ```sh
@@ -20,7 +36,7 @@ gem install sass
 
 Install dependencies:
 ```sh
-npm install
+npm install -g bower grunt-cli && yarn && bower install
 ```
 
 Create a file called `.env` in the root of the project. Put the following in it:
@@ -33,22 +49,43 @@ Optionally you can add:
 
 ```
 AUTO_RELOAD=1
-WEBSOCKET_URL=wss://blockchain.info/inv
+WEB_SOCKET_URL=wss://ws.blockchain.info/inv
 API_DOMAIN=https://api.blockchain.info
+WALLET_HELPER_URL=http://localhost:8081
+```
+
+To inspect individual directives, run:
+
+```sh
+yarn run start-parts
 ```
 
 ## Build
 
-Grunt watches and compiles the Jade view templates and CSS. Keep it running:
+Grunt watches and compiles the pug view templates and CSS. Keep it running:
 ```sh
 grunt
+```
+
+## Lint
+
+To run the file linter:
+```sh
+yarn lint
 ```
 
 ## Test
 
 To run test and monitor for changes:
 ```sh
-npm test
+yarn test
+```
+
+## Vet
+
+To ensure builds will succeed (linting and unit tests passing):
+```sh
+yarn vet
 ```
 
 A coverage report is generated after you run the test for the first time. Just open `coverage/index.html` in your browser.
@@ -57,12 +94,10 @@ A coverage report is generated after you run the test for the first time. Just o
 
 Run local http server:
 ```sh
-npm start
+yarn start
 ```
 
-Visit [local.blockchain.com:8080](http://local.blockchain.com:8080/).  Do not use `localhost:8080`. You will need to modify your "hosts" file (`/etc/hosts` on OSX and most UNIX systems) because this is no longer registered at the DNS level for application security reasons. Add this line to `/etc/hosts`:
-
-    127.0.0.1   local.blockchain.com
+Visit [localhost:8080](http://localhost:8080/).
 
 ## Developing My-Wallet-V3
 
@@ -72,18 +107,7 @@ rm My-Wallet-V3-Frontend/bower_components/blockchain-wallet/dist/my-wallet.js
 ln -s ../../../../My-Wallet-V3/dist/my-wallet.js My-Wallet-V3-Frontend/bower_components/blockchain-wallet/dist/my-wallet.js
 ```
 
-## Usage
-
-You can open any wallet registered with your email address. It will ask you to upgrade to HD if needed. You can also sign up for a new wallet.
-
-After login, you'll see a list of accounts. There will be delay before transactions and the correct balances show up. If something goes wrong during the login process, error messages appear in the console.
-
 To automatically login and go back to where you last were in the app after every page refresh, create a file `.env` and add `AUTO_RELOAD=1` to it.
-
-To reclaim funds from an email take code at the of link and add it to `#/claim`, e.g.:
-
-    https://blockchain.info/wallet/claim#7Educ5YNnVPQCQ556w7W8tQpj1dchhxPK56vVNab68cK
-    http://local.blockchain.com:8080/#/claim/7Educ5YNnVPQCQ556w7W8tQpj1dchhxPK56vVNab68cK
 
 If you enable "handle bitcoin links" in your wallet settings, you can open bitcoin URI's like this one:
 
@@ -91,15 +115,11 @@ If you enable "handle bitcoin links" in your wallet settings, you can open bitco
 
 ## Contribute
 
-Did you know you can [sign your commits](https://git-scm.com/book/tr/v2/Git-Tools-Signing-Your-Work) using a PGP key?
-
-## Testnet
-
-Not supported by the server yet.
+Bug fixes and feedback on our code is always appreciated.
 
 ## Security
 
 Security issues can be reported to us in the following venues:
 
  * Email: security@blockchain.info
- * Bug Bounty: https://www.crowdcurity.com/blockchain-info
+ * Bug Bounty: https://hackerone.com/blockchain

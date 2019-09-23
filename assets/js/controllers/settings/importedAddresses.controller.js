@@ -2,7 +2,7 @@ angular
   .module('walletApp')
   .controller('SettingsImportedAddressesCtrl', SettingsImportedAddressesCtrl);
 
-function SettingsImportedAddressesCtrl ($scope, Wallet, Alerts, $translate, $uibModal) {
+function SettingsImportedAddressesCtrl ($scope, Wallet, Alerts, $translate, $uibModal, $ocLazyLoad) {
   $scope.legacyAddresses = Wallet.legacyAddresses;
   $scope.display = { archived: false };
   $scope.settings = Wallet.settings;
@@ -12,33 +12,29 @@ function SettingsImportedAddressesCtrl ($scope, Wallet, Alerts, $translate, $uib
     $scope.display.imported = false;
   };
 
-  $scope.hasLegacyAddress = () => Wallet.legacyAddresses().filter(a => a.active && !a.isWatchOnly).length > 0;
+  $scope.activeSpendableAddresses = () => Wallet.legacyAddresses().filter(a => a.active && !a.isWatchOnly && a.balance > 0);
+  $scope.hasLegacyAddress = () => $scope.activeSpendableAddresses().length > 0;
 
   $scope.unarchive = (address) => Wallet.unarchive(address);
 
   $scope.delete = (address) => {
-    Alerts.confirm('LOSE_ACCESS').then(() => {
+    Alerts.confirm('CONFIRM_LOSE_ACCESS').then(() => {
       Wallet.deleteLegacyAddress(address);
       $scope.legacyAddresses = Wallet.legacyAddresses;
     });
   };
 
-  $scope.openVerifyMessage = () => $uibModal.open({
-    templateUrl: 'partials/settings/verify-message.jade',
-    controller: 'VerifyMessageController',
-    windowClass: 'bc-modal initial',
-    backdrop: 'static'
-  });
-
   $scope.importAddress = () => {
     Alerts.clear();
     $uibModal.open({
-      templateUrl: 'partials/settings/import-address.jade',
+      templateUrl: 'partials/settings/import-address.pug',
       controller: 'AddressImportCtrl',
       windowClass: 'bc-modal',
-      backdrop: 'static',
       resolve: {
-        address: () => null
+        address: () => null,
+        loadBcQrReader: () => {
+          return $ocLazyLoad.load('bcQrReader');
+        }
       }
     });
   };

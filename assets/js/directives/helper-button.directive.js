@@ -1,6 +1,6 @@
 
 angular
-  .module('walletApp')
+  .module('walletDirectives')
   .directive('helperButton', helperButton);
 
 helperButton.$inject = ['$translate'];
@@ -11,12 +11,14 @@ function helperButton ($translate) {
     replace: true,
     scope: {
       content: '@',
+      values: '=',
       url: '@',
       placement: '@',
       link: '@',
-      linktext: '@'
+      linktext: '@',
+      append: '@'
     },
-    templateUrl: 'templates/helper-button.jade',
+    templateUrl: 'templates/helper-button.pug',
     link: link
   };
   return directive;
@@ -25,8 +27,8 @@ function helperButton ($translate) {
     scope.warning = attrs.warning != null;
 
     scope.helperText = {
-      templateUrl: 'templates/helper-popover.jade',
-      placement: scope.placement || 'right'
+      templateUrl: 'templates/helper-popover.pug',
+      placement: scope.placement || 'top'
     };
   }
 }

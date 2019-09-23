@@ -1,30 +1,29 @@
 
 angular
-  .module('walletApp')
+  .module('walletDirectives')
   .directive('confirmRecoveryPhrase', confirmRecoveryPhrase);
 
-confirmRecoveryPhrase.$inject = ['$uibModal', 'Wallet'];
+confirmRecoveryPhrase.$inject = ['$uibModal'];
 
-function confirmRecoveryPhrase ($uibModal, Wallet) {
+function confirmRecoveryPhrase ($uibModal) {
   const directive = {
     restrict: 'E',
     replace: true,
     scope: {
-      _buttonClass: '@buttonClass'
+      promptBackup: '='
     },
-    templateUrl: 'templates/confirm-recovery-phrase.jade',
+    templateUrl: 'templates/confirm-recovery-phrase.pug',
     link: link
   };
   return directive;
 
   function link (scope, elem, attrs) {
-    scope.status = Wallet.status;
-    scope.buttonClass = scope._buttonClass || 'button-primary';
-
     scope.confirmRecoveryPhrase = () => $uibModal.open({
-      templateUrl: 'partials/confirm-recovery-phrase-modal.jade',
+      templateUrl: 'partials/confirm-recovery-phrase-modal.pug',
       controller: 'ConfirmRecoveryPhraseCtrl',
       windowClass: 'bc-modal'
     });
+
+    if (scope.promptBackup) scope.confirmRecoveryPhrase();
   }
 }

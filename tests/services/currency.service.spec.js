@@ -1,12 +1,12 @@
-'use strict';
-
 describe('currency', () => {
-  
   beforeEach(angular.mock.module('walletApp'));
 
   beforeEach(done => {
-    inject(($rootScope, currency) => {
-      currency.fetchExchangeRate().then(done);
+    inject(($rootScope, currency, $httpBackend) => {
+      // TODO: use Wallet mock, so we don't need to mock this $httpBackend call
+      $httpBackend.whenGET('/Resources/wallet-options.json').respond();
+
+      currency.fetchExchangeRate({code: 'EUR'}).then(done);
       $rootScope.$apply();
     });
   });
@@ -15,11 +15,10 @@ describe('currency', () => {
     it('should fetch the currency exchange rates', (done) => {
       inject((currency) => {
         let checkForConversions = () => {
-          expect(currency.conversions.USD).toBeDefined();
           expect(currency.conversions.EUR).toBeDefined();
           done();
         };
-        currency.fetchExchangeRate().then(checkForConversions);
+        currency.fetchExchangeRate({code: 'EUR'}).then(checkForConversions);
       });
     });
   });
@@ -51,6 +50,14 @@ describe('currency', () => {
         });
       });
     });
+  });
+
+  describe('updateCoinifyCurrencies', () => {
+    it('should set the coinify currencies correctly', inject((currency) => {
+      let expected = [{ code: 'EUR', name: 'Euro' }, { code: 'USD', name: 'U.S. Dollar' }];
+      currency.updateCoinifyCurrencies(['USD', 'EUR']);
+      expect(currency.coinifyCurrencies).toEqual(expected);
+    }));
   });
 
   describe('isBitcurrency()', () => {
@@ -149,6 +156,11 @@ describe('currency', () => {
       let conversion = currency.convertFromSatoshi(10000, currency.currencies[1]);
       expect(conversion).toEqual(0.025);
     }));
+
+    it('should return null if currency conversion is 0', inject((currency) => {
+      let conversion = currency.convertFromSatoshi(10000, currency.currencies[2]);
+      expect(conversion).toEqual(null);
+    }));
   });
 
   describe('formatCurrencyForView()', () => {
@@ -179,10 +191,25 @@ describe('currency', () => {
       expect(formatted).toEqual('0.12 USD');
     }));
 
-    it('should be able to format without the code', inject((Wallet, currency) => {
+    it('should be able to format without the code', inject((currency) => {
       let formatted = currency.formatCurrencyForView(amount, currency.bitCurrencies[0], false);
       expect(formatted).toEqual('0.12345679');
     }));
+
+    it('should format amounts that javascript has trouble with', inject((currency) => {
+      let formatted = currency.formatCurrencyForView(35.05, currency.currencies[0]);
+      expect(formatted).toEqual('35.05 USD');
+    }))
   });
 
+  describe('commaSeparate()', () => {
+    let amounts = [100, 1000, 10000, 100000, 1000000, 1000.123];
+    let expected = ['100', '1,000', '10,000', '100,000', '1,000,000', '1,000.123'];
+    amounts.forEach((amount, i) => {
+      it(`should separate ${amount}`, inject((currency) => {
+        let withCommas = currency.commaSeparate(amount, currency.bitCurrencies[0]);
+        expect(withCommas).toEqual(expected[i]);
+      }));
+    });
+  });
 });

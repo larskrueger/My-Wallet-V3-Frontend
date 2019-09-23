@@ -2,55 +2,41 @@ angular
   .module('walletApp')
   .controller('AccountFormCtrl', AccountFormCtrl);
 
-function AccountFormCtrl ($scope, Wallet, $uibModalInstance, $log, $translate, account) {
+function AccountFormCtrl (AngularHelper, $scope, $q, $uibModalInstance, $timeout, Wallet, Alerts, BitcoinCash, account) {
   $scope.accounts = Wallet.accounts;
-
-  $scope.fields = {
-    name: ''
-  };
-
-  $scope.status = {
-    edit: false,
-    busy: null
-  };
+  $scope.status = {};
+  $scope.isNameUnused = (name) => $scope.accounts().every(a => a.label !== name);
 
   if (account != null) {
-    $scope.fields.name = account.label;
+    $scope.name = account.label;
     $scope.status.edit = true;
   }
 
-  $scope.close = () => $uibModalInstance.dismiss('');
-
   $scope.createAccount = () => {
-    $scope.status.busy = true;
+    if (!Wallet.my.browserCheck()) {
+      Alerts.displayError('UNSUITABLE_BROWSER', true);
+      return $uibModalInstance.close();
+    }
 
-    const success = () => {
+    let done = () => {
+      BitcoinCash.bch.sync && BitcoinCash.bch.sync().then(() => BitcoinCash.bch.fetch());
       $scope.status.busy = false;
-      $uibModalInstance.dismiss('');
-      Wallet.saveActivity(3);
+      $scope.$root.scheduleRefresh();
+      AngularHelper.$safeApply();
     };
 
-    const error = () => $scope.status.busy = false;
-
-    const cancel = () => $scope.status.busy = false;
-
-    Wallet.createAccount($scope.fields.name, success, error, cancel);
+    $scope.status.busy = true;
+    Wallet.createAccount($scope.name, () => $uibModalInstance.dismiss(), done(), done());
   };
 
   $scope.updateAccount = () => {
     $scope.status.busy = true;
-    const success = () => {
-      $scope.status.busy = false;
-      $uibModalInstance.dismiss('');
-      Wallet.saveActivity(3);
-    };
-
-    const error = () => $scope.status.busy = false;
-
-    Wallet.renameAccount(account, $scope.fields.name, success, error);
+    $q(Wallet.renameAccount.bind(null, account, $scope.name))
+      .then(() => $uibModalInstance.dismiss(''))
+      .finally(() => $scope.status.busy = false);
   };
 
-  $scope.isNameUnused = name => {
-    return !($scope.accounts().some(e => e.label === name));
-  };
+  $scope.submit = () => $scope.status.edit
+    ? $scope.updateAccount()
+    : $scope.createAccount();
 }

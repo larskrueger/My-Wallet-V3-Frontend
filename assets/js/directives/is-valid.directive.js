@@ -1,5 +1,5 @@
 angular
-  .module('walletApp')
+  .module('walletDirectives')
   .directive('isValid', isValid);
 
 function isValid () {
@@ -11,8 +11,8 @@ function isValid () {
   return directive;
 
   function link (scope, elem, attrs, ctrl) {
-    ctrl.$viewChangeListeners.push(() => {
-      ctrl.$setValidity('isValid', scope.$eval(attrs.isValid));
-    });
+    let setValidity = () => ctrl.$setValidity('isValid', scope.$eval(attrs.isValid));
+    ctrl.$formatters.push((v) => { setValidity(); return v; });
+    ctrl.$viewChangeListeners.push(setValidity);
   }
 }

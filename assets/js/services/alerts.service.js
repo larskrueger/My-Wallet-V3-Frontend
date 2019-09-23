@@ -2,24 +2,27 @@ angular
   .module('walletApp')
   .factory('Alerts', Alerts);
 
-Alerts.$inject = ['$timeout', '$rootScope', '$translate', '$uibModal'];
+Alerts.$inject = ['$timeout', '$rootScope', 'BrowserHelper', '$q', '$translate', '$uibModal', '$uibModalStack', 'localStorageService', 'languages'];
 
-function Alerts ($timeout, $rootScope, $translate, $uibModal) {
+function Alerts ($timeout, $rootScope, BrowserHelper, $q, $translate, $uibModal, $uibModalStack, localStorageService, languages) {
   const service = {
     alerts: [],
-    close: close,
-    clear: clear,
-    display: display,
-    confirm: confirm,
-    isDuplicate: isDuplicate,
+    close,
+    clear,
+    display,
+    confirm,
+    prompt,
+    saving,
+    featureDisabled,
+    isDuplicate,
+    surveyCloseConfirm,
     displayInfo: display.bind(null, 'info'),
     displaySuccess: display.bind(null, 'success'),
     displayWarning: display.bind(null, ''),
     displayError: display.bind(null, 'danger'),
     displayReceivedBitcoin: display.bind(null, 'received-bitcoin'),
     displaySentBitcoin: display.bind(null, 'sent-bitcoin'),
-    displayVerifiedEmail: displayVerifiedEmail,
-    displayResetTwoFactor: displayResetTwoFactor
+    displayResetTwoFactor
   };
 
   function close (alert, context = service.alerts) {
@@ -39,44 +42,93 @@ function Alerts ($timeout, $rootScope, $translate, $uibModal) {
   }
 
   function display (type, message, keep = false, context = service.alerts) {
-    let alert = { type: type, msg: $translate.instant(message) };
-    if (isDuplicate(context, alert)) return;
-    alert.close = close.bind(null, alert, context);
-    if (!keep) alert.timer = $timeout(() => alert.close(), 7000);
-    context.push(alert);
-  }
-
-  function displayVerifiedEmail () {
-    $translate(['SUCCESS', 'EMAIL_VERIFIED_SUCCESS']).then(translations => {
-      $rootScope.$emit('showNotification', {
-        type: 'verified-email',
-        icon: 'ti-email',
-        heading: translations.SUCCESS,
-        msg: translations.EMAIL_VERIFIED_SUCCESS
-      });
+    let displayAlert = (msg) => $q((resolve, reject) => {
+      let alert = { type, msg };
+      let close = service.close.bind(null, alert, context);
+      if (isDuplicate(context, alert)) return reject('DUPLICATE');
+      alert.close = () => { close(); reject('CLOSED'); };
+      alert.action = () => { close(); resolve('CLICKED'); };
+      alert.timer = keep ? null : $timeout(alert.close, 7000);
+      context.push(alert);
     });
+    return $translate(message).then(displayAlert, () => displayAlert(message));
   }
 
   function displayResetTwoFactor (message) {
     $translate(['SUCCESS']).then(translations => {
-      $rootScope.$emit('showNotification', {
-        type: 'verified-email',
-        icon: 'ti-email',
-        heading: translations.SUCCESS,
-        msg: message
+      $uibModal.open({
+        templateUrl: 'partials/modal-notification.pug',
+        controller: 'ModalNotificationCtrl',
+        windowClass: 'notification-modal',
+        resolve: {
+          notification: () => ({
+            type: 'verified-email',
+            icon: 'ti-email',
+            heading: translations.SUCCESS,
+            msg: message
+          })
+        }
       });
     });
   }
 
-  function confirm (message, values = {}, modalClass = '', close = 'OK') {
+  function surveyCloseConfirm (survey, links, index) {
+    let link = links[index];
+    let surveyOpened = localStorageService.get(survey);
+    let namespace = survey.split('-').join('_').toUpperCase();
+    let hasSeenPrompt = !links.length || index >= links.length || surveyOpened && surveyOpened.index >= index;
+
+    if (hasSeenPrompt) {
+      return service.confirm(namespace, { action: 'IM_DONE' }).then(() => $uibModalStack.dismissAll());
+    } else {
+      localStorageService.set(survey, {index: index});
+      let openSurvey = () => BrowserHelper.safeWindowOpen(link);
+      let surveyPrompt = namespace + '_PROMPT';
+
+      return service.confirm(surveyPrompt, {action: 'TAKE_SURVEY', friendly: true, cancel: 'NO_THANKS'})
+                    .then(openSurvey)
+                    .catch(() => $uibModalStack.dismissAll());
+    }
+  }
+
+  // options = { values, props, friendly, success, action, modalClass, iconClass }
+  function confirm (namespace, options = {}) {
     return $uibModal.open({
-      templateUrl: 'partials/modal-confirm.jade',
-      windowClass: 'bc-modal confirm ' + modalClass,
-      controller: function ($scope) {
-        $scope.message = message;
-        $scope.values = values;
-        $scope.close = close;
+      templateUrl: 'partials/modal-confirm.pug',
+      windowClass: `bc-modal confirm ${options.modalClass || ''}`,
+      controller: ($scope) => angular.extend($scope, options, { namespace })
+    }).result;
+  }
+
+  function prompt (message, options = {}) {
+    return $uibModal.open({
+      templateUrl: 'partials/modal-prompt.pug',
+      windowClass: 'bc-modal medium',
+      controller: ($scope) => angular.extend($scope, options, { message })
+    }).result;
+  }
+
+  function saving () {
+    return $uibModal.open({
+      templateUrl: 'partials/modal-saving.pug',
+      windowClass: 'bc-modal confirm top',
+      backdrop: 'static',
+      keyboard: false,
+      controller: function ($uibModalInstance, MyWallet) {
+        let sync = () => $q(MyWallet.syncWallet)
+          .then(() => $uibModalInstance.close(true))
+          .catch(() => sync());
+        sync();
       }
+    }).result;
+  }
+
+  function featureDisabled (disabledReason) {
+    let reason = disabledReason && languages.localizeMessage(disabledReason);
+    return $uibModal.open({
+      templateUrl: 'partials/modal-feature-disabled.pug',
+      windowClass: 'bc-modal confirm top',
+      controller: ($scope) => angular.extend($scope, { reason })
     }).result;
   }
 

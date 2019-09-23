@@ -17,9 +17,9 @@ bower_components
 
 # Config
 .env
-betakeys.MDF
 e2e-tests/ignore.js
 .settings
+.tern-project
 
 # Generated files
 Changelog.md
@@ -30,6 +30,7 @@ build
 coverage
 coverage-lcov
 dist
+package-lock.json
 
 # External modules
 assets/js/bc-qr-reader.js

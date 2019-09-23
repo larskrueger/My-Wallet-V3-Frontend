@@ -4,12 +4,12 @@
   border: 1px solid $mid-grey;
   border-radius: 100%;
   background-color: white;
-  width: 20px;
-  height: 20px;
-  font-size: 12px;
+  width: 16px;
+  height: 16px;
+  font-size: 9px;
   font-weight: 500;
   margin-left: 5px;
-  margin-right: 5px;
+  margin-right: 0px;
   position: relative;
   &:focus {
     outline: none;
@@ -19,18 +19,20 @@
     background: $blue;
     color: white;
   }
-  .close-helper {
+  > span {
     top: 50%;
     left: 50%;
     position: absolute;
     transform: translate(-50%, -50%);
     -moz-transform: translate(-50%, -50%);
     -webkit-transform: translate(-50%, -50%);
-    &:before {
-      color: white;
-      font-size: 9px;
-      content: "\e646";
-      font-family: 'ThemifyIcons';
+    &.close-helper {
+      &:before {
+        color: white;
+        font-size: 6px;
+        content: "\e646";
+        font-family: 'ThemifyIcons';
+      }
     }
   }
 }
@@ -41,7 +43,7 @@
 
 //override parts of bootstrap popover
 .popover {
-  font-family: 'Roboto', 'Helvetica', sans-serif;
+  font-family: 'Montserrat', 'Helvetica', sans-serif;
   width: 225px;
   box-shadow: 0 3px 8px 0px rgba(158, 158, 158, 0.65) !important;
   border-radius: 7px !important;

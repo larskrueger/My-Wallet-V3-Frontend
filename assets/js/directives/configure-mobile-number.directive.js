@@ -1,11 +1,11 @@
 
 angular
-  .module('walletApp')
+  .module('walletDirectives')
   .directive('configureMobileNumber', configureMobileNumber);
 
-configureMobileNumber.$inject = ['Wallet'];
+configureMobileNumber.$inject = ['Wallet', 'bcPhoneNumber'];
 
-function configureMobileNumber (Wallet) {
+function configureMobileNumber (Wallet, bcPhoneNumber) {
   const directive = {
     restrict: 'E',
     replace: true,
@@ -13,7 +13,7 @@ function configureMobileNumber (Wallet) {
       onCancel: '&',
       onSuccess: '&'
     },
-    templateUrl: 'templates/configure-mobile-number.jade',
+    templateUrl: 'templates/configure-mobile-number.pug',
     link: link
   };
   return directive;
@@ -29,13 +29,11 @@ function configureMobileNumber (Wallet) {
     if (attrs.buttonLg) scope.buttonLg = true;
     if (attrs.fullWidth) scope.fullWidth = true;
 
-    scope.fields.newMobile = Wallet.user.internationalMobileNumber;
-
     scope.numberChanged = () =>
-      scope.fields.newMobile !== Wallet.user.internationalMobileNumber;
+      scope.fields.newMobile !== scope.previousNumber;
 
     scope.cancel = () => {
-      scope.fields.newMobile = Wallet.user.internationalMobileNumber;
+      scope.fields.newMobile = scope.previousNumber;
       scope.onCancel();
     };
 
@@ -45,18 +43,19 @@ function configureMobileNumber (Wallet) {
       let success = () => {
         scope.status.busy = false;
         scope.onSuccess();
-        Wallet.user.internationalMobileNumber = scope.fields.newMobile;
+        Wallet.user.mobileNumber = scope.fields.newMobile;
       };
 
       let error = () => {
         scope.status.busy = false;
       };
 
-      let mobile = {
-        country: scope.fields.newMobile.split(' ')[0],
-        number: scope.fields.newMobile.split(' ').slice(1).join('')
-      };
-      Wallet.changeMobile(mobile, success, error);
+      Wallet.changeMobile(scope.fields.newMobile.split('-').join(''), success, error);
     };
+
+    scope.$watch(() => Wallet.user.mobileNumber, () => {
+      scope.previousNumber = bcPhoneNumber.format(Wallet.user.mobileNumber);
+      scope.fields.newMobile = scope.previousNumber;
+    });
   }
 }

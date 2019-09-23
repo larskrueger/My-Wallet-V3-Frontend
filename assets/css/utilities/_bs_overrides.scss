@@ -5,9 +5,15 @@
 .btn-info {
   background: $mid-grey;
   border-color: $mid-grey;
-  font-size: 100%;
-  font-weight: normal;
 }
+
+ul.uib-datepicker-popup {
+  padding: 10px;
+  .uib-button-bar {
+    padding: 10px 0px 0px 0px;
+  }
+}
+
 
 .btn-info:hover, .btn-info:focus, .btn-info.focus, .btn-info:active, .btn-info.active, .open > .btn-info.dropdown-toggle {
   background: darken($mid-grey, 5%);
@@ -16,6 +22,18 @@
 
 .btn .caret {
   margin-left: 5px;
+}
+
+// Mobile UIB Dropdowns
+@media (max-width: 767px) {
+  .open {
+    // Show the menu
+    > .uib-dropdown-menu {
+      display: block;
+      overflow: auto;
+      max-width: 280px;
+    }
+  }
 }
 
 /////////////////////////////////////
@@ -34,15 +52,14 @@ $select-fg: #686868;
       box-shadow: none;
     }
     > span {
-      border: 1px solid $eee !important;
-
+      border: 1px solid $border-grey !important;
       box-shadow: none;
       padding-bottom: 0;
       color: $black !important;
       border-radius: 0px !important;
     }
     .ui-select-container .ui-select-toggle {
-    height: 30px;
+      height: 30px;
     }
   }
 
@@ -51,12 +68,19 @@ $select-fg: #686868;
     background-color: transparent;
     border-color: none;
   }
+
+  &.asset-select {
+    .ui-select-choices-row > a {
+      padding: 8px 16px;
+    }
+  }
+
   &.ui-select-bootstrap.dropdown.open {
     input {
       border-radius: 0;
       background: $select-bg;
       color: $select-fg;
-      border: 1px solid $eee;
+      border: 1px solid $border-grey;
       box-shadow: none;
     }
     .caret {
@@ -65,7 +89,7 @@ $select-fg: #686868;
   }
   .ui-select-choices-group-label.dropdown-header { //idk what you want to call these colors.
     color: $select-fg;
-    padding: .4em 1.25em;
+    padding: 4px 12px;
     background: #F4F4F4;
     text-shadow: 0px 1px 0px #FFFFFF;
     font-weight: 500;
@@ -83,7 +107,7 @@ $select-fg: #686868;
 .ui-select-bootstrap > .ui-select-choices {
   border-radius: 0;
   background: $select-bg;
-  border: 1px solid $eee; //you'll want to add this color in your sassy way
+  border: 1px solid $border-grey; //you'll want to add this color in your sassy way
   -webkit-box-shadow: 0px 5px 10px -6px black;
   box-shadow: 0px 5px 10px -6px black;
 }
@@ -120,7 +144,10 @@ $select-fg: #686868;
 
 //Give toggle min height
 .ui-select-container{
-.ui-select-toggle{height: 34px;}
+  .ui-select-toggle{
+    height: 40px;
+    padding: 8px 12px;
+  }
 }
 
 //form errors in modals
@@ -128,6 +155,11 @@ $select-fg: #686868;
   border-color: #a94442 !important;
   -webkit-box-shadow: none !important;
   box-shadow: none !important;
+}
+
+//override progress bar
+.progress {
+  border-radius: 0;
 }
 
 //override pre from bootstrap
@@ -140,18 +172,245 @@ pre {
 //angular popovers
 .clean-popover {
   border-radius: 0px !important;
-  border: 1px solid $eee !important;
+  border: 1px solid $border-grey !important;
   .popover-content {
     padding: 5px 5px 7px 5px;
   }
   &.top {
     .arrow {
-      border-top-color: $eee !important;
+      border-top-color: $border-grey !important;
     }
   }
   &.bottom {
    .arrow {
-      border-bottom-color: $eee !important;
+      border-bottom-color: $border-grey !important;
    }
+  }
+}
+
+//popover font
+.popover-content {
+  font-family: 'Gillsans' !important;
+  font-weight: 300 !important;
+  font-size: 14px !important;
+}
+
+//override tooltip
+$transparent-border: 10px solid transparent !important;
+$transparent-border-after: 9px solid transparent;
+$tt-top-default: 10px;
+$tt-left-default: 9px;
+$tt-position-default: -4px !important;
+
+.tooltip-inner {
+  @extend .popover-content;
+  background-color: $grey !important;
+  color: $black !important;
+  border: 1px solid $mid-grey !important;
+  border-radius: 7px !important;
+  box-shadow: 0 3px 8px 0 rgba(158, 158, 158, 0.65) !important;
+}
+
+.address {
+  .tooltip-inner {
+    max-width: none;
+    font-size: 12px !important;
+    font-family: 'Montserrat' !important;
+  }
+}
+
+.tooltip.in {
+  opacity: 1 !important;
+}
+.tooltip.top {
+  .tooltip-arrow {
+    left: 46% !important;
+  }
+  .tooltip-arrow {
+    bottom: $tt-position-default;
+    width: 0 !important;
+    height: 0 !important;
+    border-top: 10px solid $mid-grey !important;
+    border-right: $transparent-border;
+    border-left: $transparent-border;
+    border-bottom-width: 0px !important;
+    border-width: $tt-top-default;
+  }
+  .tooltip-arrow::after {
+    display: block;
+    position: relative;
+    top: -$tt-top-default;
+    left: -$tt-left-default;
+    content: '';
+    width: 0;
+    height: 0;
+    border-top: 9px solid $grey;
+    border-bottom: $transparent-border-after;
+    border-right: $transparent-border-after;
+    border-left: $transparent-border-after;
+    border-bottom-width: 0px;
+  }
+}
+
+.tooltip {
+  &.right {
+    .tooltip-arrow {
+      left: $tt-position-default;
+      top: 42% !important;
+      bottom: -14px !important;
+      width: 0 !important;
+      height: 0 !important;
+      border-top: $transparent-border;
+      border-bottom: $transparent-border;
+      border-right: 10px solid $mid-grey !important;
+      border-left: $transparent-border;
+    }
+    .tooltip-arrow::after {
+      display: block;
+      position: relative;
+      top: -$tt-top-default + 1px;
+      left: -$tt-left-default + 1px;
+      content: '';
+      width: 0;
+      height: 0;
+      border-top: $transparent-border-after;
+      border-bottom: $transparent-border-after;
+      border-right: 9px solid $grey;
+      border-left: $transparent-border-after;
+    }
+  }
+}
+
+// do not affect security center tooltips
+.level-badge a .tooltip.top .tooltip-arrow {
+  border-bottom: none !important;
+  bottom: -4px !important;
+}
+
+.badge {
+  background-color: $regal-blue !important;
+  padding: 3px 6px 3px 7px !important;
+}
+
+// -------------- UIB-DATEPICKER -------------- //
+
+.uib-datepicker-popup {
+  table {
+    thead {
+      tr {
+        th {
+          button {
+            i {
+              color: #ccc;
+            }
+          }
+        }
+      }
+      strong {
+        font-weight: 300;
+      }
+      small {
+        font-size: 12px;
+        font-weight: 300;
+      }
+    }
+    tbody {
+      tr {
+        td {
+          button {
+            border: none;
+          }
+          button.active {
+            background: $iris;
+            box-shadow: none;
+            span {
+              color: white;
+            }
+          }
+          button.active:hover {
+            background: $iris;
+            box-shadow: none;
+          }
+        }
+      }
+    }
+  }
+  > .uib-button-bar {
+    > .btn-success {
+      @extend .button-primary;
+      @extend .button-sm;
+    }
+    > .btn-group.pull-left {
+      > .btn-danger, .btn-info {
+        @extend .button-muted;
+        color: $iris;
+      }
+      > .btn-danger:hover, .btn-info:hover {
+        background-color: white;
+        color: $iris;
+      }
+    }
+  }
+}
+
+.shift-create .ui-select-container {
+  &.asset-select {
+    .ui-select-choices-group-label.dropdown-header {
+      display: none;
+    }
+    .ui-select-choices-row {
+      > a {
+        padding: 2px 10px;
+      }
+      &.active {
+        > a {
+          background-color: #EEF4FA;
+        }
+      }
+    }
+    .is-grouped {
+      .ui-select-choices {
+        padding: 0;
+      }
+      .ui-select-choices-group {
+        margin-top: 5px;
+        position: relative;
+      }
+      .divider {
+        display: none;
+      }
+      .ui-select-choices-group-label.dropdown-header {
+        @extend .flex-row;
+        @extend .flex-center;
+        border: 0;
+        font-weight: 300;
+        background: white;
+        padding: 2px 15px 2px 30px;
+        text-shadow: none;
+        text-transform: uppercase;
+        &:after {
+          content: '';
+          width: 100%;
+          height: 1px;
+          @extend .flex;
+          background: #DDD;
+          margin-left: 10px;
+        }
+      }
+      .ui-select-choices-row:not(:nth-child(3)) {
+        > a {
+          i { display: none;}
+        }
+      }
+      .ui-select-choices-row:nth-child(3) {
+        > a {
+          i {
+            top: 2px;
+            left: 10px;
+            position: absolute;
+          }
+        }
+      }
+    }
   }
 }

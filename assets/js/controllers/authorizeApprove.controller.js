@@ -2,7 +2,7 @@ angular
   .module('walletApp')
   .controller('AuthorizeApproveCtrl', AuthorizeApproveCtrl);
 
-function AuthorizeApproveCtrl ($window, $scope, WalletTokenEndpoints, $stateParams, $state, Alerts, $translate, $rootScope) {
+function AuthorizeApproveCtrl ($window, $scope, WalletTokenEndpoints, $stateParams, $state, Alerts, $translate, AngularHelper, MyWalletHelpers) {
   $scope.success = false;
 
   const success = (res) => {
@@ -14,8 +14,11 @@ function AuthorizeApproveCtrl ($window, $scope, WalletTokenEndpoints, $statePara
     if (res.success == null) return;
 
     $scope.success = true;
-
-    $rootScope.$safeApply();
+    // Prompt to open iOS app
+    if (MyWalletHelpers.getMobileOperatingSystem() === 'iOS') {
+      $window.location.href = 'blockchain-wallet://loginAuthorized';
+    }
+    AngularHelper.$safeApply();
   };
 
   const error = (res) => {
@@ -25,7 +28,7 @@ function AuthorizeApproveCtrl ($window, $scope, WalletTokenEndpoints, $statePara
 
     $state.go('public.login-no-uid');
     Alerts.displayError(res.error, true);
-    $rootScope.$safeApply();
+    AngularHelper.$safeApply();
   };
 
   const differentBrowser = (details) => {
@@ -33,7 +36,7 @@ function AuthorizeApproveCtrl ($window, $scope, WalletTokenEndpoints, $statePara
 
     $scope.differentBrowser = true;
     $scope.details = details;
-    $rootScope.$safeApply();
+    AngularHelper.$safeApply();
   };
 
   $scope.checkingToken = true;

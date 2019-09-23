@@ -1,2 +1,0 @@
-
-beforeEach(module('templates-main'));

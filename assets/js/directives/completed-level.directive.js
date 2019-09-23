@@ -1,11 +1,11 @@
 
 angular
-  .module('walletApp')
+  .module('walletDirectives')
   .directive('completedLevel', completedLevel);
 
-completedLevel.$inject = ['$translate'];
+completedLevel.$inject = [];
 
-function completedLevel ($translate) {
+function completedLevel () {
   const directive = {
     restrict: 'E',
     replace: true,
@@ -15,20 +15,14 @@ function completedLevel ($translate) {
       message: '@',
       placement: '@'
     },
-    templateUrl: 'templates/completed-level.jade',
+    templateUrl: 'templates/completed-level.pug',
     link: link
   };
   return directive;
 
   function link (scope, elem, attrs) {
-    $translate(scope.content).then((translation) => {
-      scope.content = translation;
-    });
-    $translate(scope.message).then((translation) => {
-      scope.message = translation;
-    });
     scope.tooltip = {
-      templateUrl: 'templates/completed-level-tooltip.jade',
+      templateUrl: 'templates/completed-level-tooltip.pug',
       placement: scope.placement || 'top'
     };
   }

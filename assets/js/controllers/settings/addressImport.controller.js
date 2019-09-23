@@ -2,23 +2,16 @@ angular
   .module('walletApp')
   .controller('AddressImportCtrl', AddressImportCtrl);
 
-function AddressImportCtrl ($scope, $log, Wallet, Alerts, $uibModalInstance, $translate, $state, $timeout, address, $rootScope) {
+function AddressImportCtrl ($scope, AngularHelper, $uibModal, Wallet, Alerts, $uibModalInstance, $state, $timeout, BitcoinCash) {
   $scope.settings = Wallet.settings;
   $scope.accounts = Wallet.accounts;
   $scope.alerts = [];
-  $scope.address = address;
-  $scope.step = address ? 3 : 1;
+  $scope.address = null;
   $scope.BIP38 = false;
-  $scope.status = {
-    busy: false,
-    sweeping: false,
-    cameraIsOn: false
-  };
-  $scope.fields = {
-    addressOrPrivateKey: '',
-    bip38passphrase: '',
-    account: null
-  };
+  $scope.step = 1;
+
+  $scope.status = {};
+  $scope.fields = { addressOrPrivateKey: '', bip38passphrase: '', account: null };
 
   $scope.$watchCollection('accounts()', (newValue) => {
     $scope.fields.account = Wallet.accounts()[Wallet.my.wallet.hdwallet.defaultAccountIndex];
@@ -28,39 +21,66 @@ function AddressImportCtrl ($scope, $log, Wallet, Alerts, $uibModalInstance, $tr
     return Wallet.isValidAddress(val) || Wallet.isValidPrivateKey(val);
   };
 
+  $scope.goToTransfer = () => {
+    $uibModalInstance.close();
+    $uibModal.open({
+      templateUrl: 'partials/settings/transfer.pug',
+      controller: 'TransferController',
+      windowClass: 'bc-modal',
+      resolve: { address: () => $scope.address }
+    });
+  };
+
+  $scope.parseBitcoinUrl = (url) => url.replace('bitcoin:', '').replace(/\//g, '');
+
+  $scope.onAddressScan = (url) => {
+    $scope.fields.addressOrPrivateKey = $scope.parseBitcoinUrl(url);
+    let valid = $scope.isValidAddressOrPrivateKey($scope.fields.addressOrPrivateKey);
+    $scope.importForm.privateKey.$setValidity('isValid', valid);
+  };
+
+  $scope.importSuccess = (address) => {
+    BitcoinCash.bch.fetch && BitcoinCash.bch.fetch();
+    $scope.status.busy = false;
+    $scope.address = address;
+    $scope.step = 2;
+    AngularHelper.$safeApply($scope);
+  };
+
+  $scope.importError = (err) => {
+    $scope.status.busy = false;
+    AngularHelper.$safeApply($scope);
+
+    switch (err instanceof Error ? err.message : err) {
+      case 'presentInWallet':
+        $scope.importForm.privateKey.$setValidity('present', false);
+        $scope.BIP38 = false;
+        break;
+      case 'wrongBipPass':
+        $scope.importForm.bipPassphrase.$setValidity('wrong', false);
+        break;
+      case 'importError':
+        $scope.importForm.privateKey.$setValidity('check', false);
+        $scope.step = 1;
+        $scope.BIP38 = false;
+        $scope.proceedWithBip38 = undefined;
+        break;
+      default: {
+        Alerts.displayError('UNKNOWN_ERROR');
+      }
+    }
+  };
+
+  $scope.importCancel = () => {
+    $scope.status.busy = false;
+    AngularHelper.$safeApply($scope);
+  };
+
   $scope.import = () => {
     $scope.status.busy = true;
-    $scope.$safeApply();
+    AngularHelper.$safeApply($scope);
     let addressOrPrivateKey = $scope.fields.addressOrPrivateKey.trim();
     let bip38passphrase = $scope.fields.bip38passphrase.trim();
-
-    const success = (address) => {
-      $scope.status.busy = false;
-      $scope.address = address;
-      $scope.step = 2;
-      $scope.$safeApply();
-    };
-
-    const error = (err) => {
-      $scope.status.busy = false;
-      $scope.$safeApply();
-
-      switch (err) {
-        case 'presentInWallet':
-          $scope.importForm.privateKey.$setValidity('present', false);
-          $scope.BIP38 = false;
-          break;
-        case 'wrongBipPass':
-          $scope.importForm.bipPassphrase.$setValidity('wrong', false);
-          break;
-        case 'importError':
-          $scope.importForm.privateKey.$setValidity('check', false);
-          $scope.step = 1;
-          $scope.BIP38 = false;
-          $scope.proceedWithBip38 = undefined;
-          break;
-      }
-    };
 
     const needsBipPassphrase = (proceed) => {
       $scope.status.busy = false;
@@ -68,103 +88,34 @@ function AddressImportCtrl ($scope, $log, Wallet, Alerts, $uibModalInstance, $tr
       $timeout(() => { $scope.BIP38 = true; });
     };
 
-    const cancel = () => {
-      $scope.status.busy = false;
-      $scope.$safeApply();
-    };
+    const attemptImport = Wallet.addAddressOrPrivateKey.bind(
+      null,
+      addressOrPrivateKey,
+      needsBipPassphrase,
+      $scope.importSuccess,
+      $scope.importError,
+      $scope.importCancel
+    );
 
     $timeout(() => {
       if (!$scope.BIP38) {
-        Wallet.addAddressOrPrivateKey(
-          addressOrPrivateKey, needsBipPassphrase, success, error, cancel
-        );
+        if (Wallet.isValidAddress(addressOrPrivateKey)) {
+          Alerts.confirm('CONFIRM_IMPORT_WATCH')
+            .then(attemptImport)
+            .finally(() => $scope.status.busy = false);
+        } else {
+          attemptImport();
+        }
       } else {
         $scope.proceedWithBip38(bip38passphrase);
       }
     }, 250);
   };
 
-  $scope.transfer = () => {
-    $scope.status.sweeping = true;
-
-    const success = () => {
-      $scope.status.sweeping = false;
-      $uibModalInstance.dismiss('');
-      $rootScope.scheduleRefresh();
-      $state.go('wallet.common.transactions', {
-        accountIndex: $scope.fields.account.index
-      });
-      $translate(['SUCCESS', 'BITCOIN_SENT']).then(translations => {
-        $scope.$emit('showNotification', {
-          type: 'sent-bitcoin',
-          icon: 'bc-icon-send',
-          heading: translations.SUCCESS,
-          msg: translations.BITCOIN_SENT
-        });
-      });
-    };
-
-    const error = (error) => {
-      $scope.status.sweeping = false;
-      if (error && typeof error === 'string') {
-        Alerts.displayError(error, false, $scope.alerts);
-      } else {
-        console.log(error);
-        Alerts.displayError('SWEEP_FAILED', false, $scope.alerts);
-      }
-      $scope.$root.$safeApply($scope);
-    };
-
-    let sweepErr = 'SWEEP_LOW_BALANCE_ERR';
-
-    let payment = new Wallet.Payment();
-    payment
-      .from($scope.address.address)
-      .to($scope.fields.account.index)
-      .useAll()
-      .sideEffect(p => { if (p.sweepAmount <= 0) throw sweepErr; })
-      .build();
-
-    const signAndPublish = (passphrase) => {
-      return payment.sign(passphrase).publish().payment;
-    };
-
-    Wallet.askForSecondPasswordIfNeeded()
-      .then(signAndPublish).then(success).catch(error);
-  };
-
-  $scope.goToTransfer = () => {
-    $scope.step = 3;
-  };
-
-  $scope.onError = () => {
-    Alerts.displayWarning('CAMERA_PERMISSION_DENIED', false, $scope.alerts);
-  };
-
-  $scope.cameraOn = () => {
-    $scope.cameraRequested = true;
-  };
-
-  $scope.cameraOff = () => {
-    $scope.status.cameraIsOn = false;
-    $scope.cameraRequested = false;
-    $scope.$broadcast('STOP_WEBCAM');
-  };
-
-  $scope.onAddressScan = (url) => {
-    $scope.fields.addressOrPrivateKey = $scope.parseBitcoinUrl(url);
-    $scope.cameraOff();
-    let valid = $scope.isValidAddressOrPrivateKey($scope.fields.addressOrPrivateKey);
-    $scope.importForm.privateKey.$setValidity('isValid', valid);
-  };
-
-  $scope.parseBitcoinUrl = (url) => {
-    return url.replace('bitcoin:', '').replace(/\//g, '');
-  };
-
   $scope.close = () => {
     if ($scope.step === 2 && $scope.address.balance > 0 && !$scope.address.isWatchOnly) {
-      Alerts.confirm('CONFIRM_NOT_SWEEP', {}, '', 'DONT_SWEEP').then($uibModalInstance.dismiss);
+      Alerts.confirm('CONFIRM_NOT_SWEEP', { action: 'TRANSFER', friendly: true })
+        .then($scope.goToTransfer).catch($uibModalInstance.dismiss);
     } else {
       $uibModalInstance.dismiss('');
     }

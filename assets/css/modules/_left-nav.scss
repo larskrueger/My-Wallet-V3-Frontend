@@ -3,6 +3,24 @@
   position: relative;
   @extend .flex-between;
   flex-direction: column;
+  li.header {
+    .message {
+      right: -3px;
+    }
+  }
+  @media (max-width: 1024px) {
+    .visible-xs.visible-sm {
+      display: block !important;
+    }
+  }
+}
+
+.tray ~ .wallet-container {
+  li.header {
+    .message-contextual {
+      right: 0px;
+    }
+  }
 }
 
 ul.aside {
@@ -34,14 +52,35 @@ ul.aside {
           color: $security-green;
         }
       }
-      i { margin-right: .55em; line-height: 0; font-size: 1.3em; }
+      i {
+        @extend .f-20;
+        margin-right: .55em;
+        text-align: center;
+        line-height: 0;
+        width: 20px;
+      }
     }
   }
   li.current {
-    background: #EBEBEB;
+    a {
+      i,
+      span {
+        color: $iris;
+      }
+    }
+  }
+  li {
+    span.tx-divider:after {
+      position: absolute;
+      content: "";
+      height: 1px;
+      background-color: grey;
+      width: 9.8em;
+      margin-left: 10px;
+      top: 50%;
+    }
   }
   ul.aside-list{
-    background: white;
     list-style: none;
     font-size: 1em;
     text-transform: none;
@@ -50,16 +89,11 @@ ul.aside {
       span {
         color: $basic-grey;
       }
-      &.imported-addresses{
-        > span {
-          color: $mid-grey;
-        }
-      }
     }
     li.active{
       a {
         span {
-          color: $blue;
+          color: $iris;
           font-weight: 500;
         }
         &:focus {
@@ -74,9 +108,6 @@ ul.aside {
 }
 
 .wallet-footer {
-  left: 0px;
-  position: absolute;
-  bottom: calc(0% + 7%);
   ul.aside-list {
     background: transparent;
     li {
@@ -112,7 +143,10 @@ ul.aside {
     max-height: 150px;
     overflow-x: auto;
   }
-  .scroll-settings{ max-height: 190px; }
+  .scroll-settings{
+    max-height: 190px;
+    padding-left: 38px;
+  }
 }
 
 @media (max-width: 620px) {
@@ -122,40 +156,8 @@ ul.aside {
   }
 }
 
-.scroll-hidden {
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  ::-webkit-scrollbar-button {
-    width: 0px;
-    height: 0px;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #fff;
-    border: 0px none $border-grey;
-    border-radius: 100px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #c9c9c9;
-  }
-  ::-webkit-scrollbar-thumb:active {
-    background: #606060;
-  }
-  ::-webkit-scrollbar-track {
-    background: white;
-    border: 0px none #ff5a28;
-    border-radius: 100px;
-  }
-  ::-webkit-scrollbar-track:hover {
-    background: #ffffff;
-  }
-  ::-webkit-scrollbar-track:active {
-    background: #ededed;
-  }
-  ::-webkit-scrollbar-corner {
-    background: transparent;
-  }
+::-webkit-scrollbar {
+  display: none;
 }
 
 
@@ -170,17 +172,13 @@ li.action-bar{
 }
 .settings-nav { margin-top: 10px; }
 .settings-nav-header {
-  background: $light-grey;
+  background: $grey;
 }
 
 @media (max-width: 480px) {
-  ul.aside  {
-    li.header, a.new-acct {
-      font-size: .75em;
-    }
-  }
   .wallet-footer { margin: 0; }
-  .terms-policy {
-    font-size: .75em;
-  }
+}
+
+.border-solid {
+  border-bottom: 1px solid grey;
 }

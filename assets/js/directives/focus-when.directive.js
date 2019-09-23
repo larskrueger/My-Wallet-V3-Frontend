@@ -1,14 +1,16 @@
 
 angular
-  .module('walletApp')
+  .module('walletDirectives')
   .directive('focusWhen', focusWhen);
 
-function focusWhen () {
+function focusWhen ($timeout) {
   return {
     restrict: 'A',
     link: link
   };
   function link (scope, elem, attrs) {
-    if (scope.$eval(attrs.focusWhen)) elem[0].focus();
+    scope.$watch(attrs.focusWhen, (value) => {
+      if (value) $timeout(() => elem[0].focus(), 100);
+    });
   }
 }

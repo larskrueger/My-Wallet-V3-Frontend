@@ -1,16 +1,44 @@
-// SEND & RECEIVE & SIGN MSG
-
-#send, #receive, #sign-msg {
-  .divider {
-    margin: 0px auto;
+#send,
+#receive,
+#sign-msg,
+.filter-bar {
+  .ui-select-choices-row-inner,
+  .ui-select-match {
+    label-origin {
+      display: block;
+      overflow: hidden;
+      height: 1.428571429em;
+    }
   }
-  // we need to remove this when we come up with what we want to call Accounts
+}
+
+#send,
+#receive,
+#sign-msg {
   .dropdown-menu {
     > li:first-child {
       .dropdown-header {
+        // we need to remove this when we come up with what we want to call Accounts
         display: none;
       }
     }
+  }
+}
+
+#send,
+#receive {
+
+}
+
+#send,
+#sign-msg {
+  .inprv {
+    bottom: -12px;
+  }
+  .open > .uib-dropdown-menu {
+    overflow-y: auto;
+    max-height: 160px;
+    overflow-x: hidden;
   }
   .row {
     @extend .flex-row;
@@ -23,20 +51,29 @@
     }
     > div, textarea, .bitcoin-address {
       @extend .mlm;
-      @media (min-width: 769px) {
-        max-width: 420px;
-        min-width: 420px;
+      @media (min-width: 768px) {
+        max-width: 440px;
+        min-width: 440px;
+      }
+      &.auto {
+        width: auto;
+        max-width: initial;
+        min-width: initial;
       }
     }
-    @media (max-width: 768px) {
+    @media (max-width: 767px) {
       display: block;
       > label {
         min-width: auto;
+        min-width: initial;
       }
       > div, textarea, .bitcoin-address {
+        width: 100%;
         min-width: auto;
         max-width: none;
         margin-left: 0px;
+        min-width: initial;
+        border-radius: 0px;
       }
     }
   }
@@ -56,10 +93,20 @@
     clear: left;
   }
 
+  .ui-select-match {
+    label-origin {
+      > span:first-child {
+        max-width: 200px;
+      }
+    }
+  }
 
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     .row {
       display: block;
+    }
+    & + .modal-footer {
+      font-size: 12px;
     }
   }
 }
@@ -68,9 +115,6 @@
 
 #send {
   .destination-input {
-    input, button {
-      height: 34px;
-    }
     input {
       @extend .brdrn;
     }
@@ -78,7 +122,7 @@
 
   .form-group {
     > label {
-      min-width: 75px;
+      min-width: 105px;
     }
     &.note {
       button {
@@ -86,21 +130,8 @@
         right: -10px;
         position: absolute;
       }
-    }
-    &.fee {
-      button {
-        bottom: 5px;
-        right: -10px;
-        position: absolute;
-      }
-      & ~ .help-block {
-        margin-left: calc(35px + 1.25em);
-        &.friendly {
-          color: $blue;
-        }
-        &.has-error {
-          color: $state-danger-text;
-        }
+      textarea {
+        margin-left: 0;
       }
     }
   }
@@ -113,267 +144,25 @@
     }
   }
 
-  &.advanced-container {
-    .add {
-      background-color: $aaa;
-      border-radius: 100%;
-      position: absolute;
-      bottom: -5px;
-      right: -15px;
-      padding: 0px;
-      height: 30px;
-      width: 30px;
-    }
-    .advanced-recipient-row {
-      margin-bottom: 20px;
-      position: relative;
-      border: 1px solid #eee;
-      padding: 1em;
-      .ui-select-container {
-        min-width: 225px;
-        margin-right: 10px;
-      }
-      > .remove {
-        border-radius: 100%;
-        position: absolute;
-        padding: 1px 5px;
-        right: -10px;
-        top: -10px;
-        z-index: 2;
-      }
-      & + .has-error {
-        top: -20px;
-      }
-    }
-  }
-
-  &.confirmation {
-    @media (min-width: 769px) {
-      min-width: 520px;
-      padding-left: 25px;
-      padding-right: 25px;
-    }
-    .btcaddr {
-      font-size: 0.7em;
-    }
-    .overview {
-      .flex-row {
-        > span.account {
-          text-align: left;
-          @media (max-width: 768px) {
-            max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-          &.aaa {
-            color: $aaa !important;
-          }
-        }
-        > span:last-of-type {
-          text-align: right;
-        }
-        .helper {
-          position: absolute;
-          left: 20px;
-          top: -2px;
-        }
-      }
-    }
-  }
-
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     &.fade {
       opacity: 1 !important;
     }
   }
-  @media (min-width: 769px) {
-    &.fade {
-      opacity: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      @include bc-ng-animate('confirmation', 'height', '265px', '200px');
-      @include bc-ng-animate('advanced-container', 'height', '265px', '365px');
-    }
-    &.sm.fade {
-      @include bc-ng-animate('advanced-container', 'height', '145px', '290px');
-    }
-    &.confirmation.fade {
-      @include bc-ng-animate('confirmation', 'height', '265px', '200px');
-    }
-  }
 }
-
-.miners-fee-selection {
-  .fee-choices, .fee-custom { @extend .flex; }
-  .fee-choices {
-    border-right: 1px solid $grey;
-    flex-direction: column;
-    margin-right: 30px;
-    padding-right: 20px;
-  }
-  .fee-custom {
-    align-items: center;
-  }
-  label { font-size: small; }
-}
-
-@media (max-width: 668px) {
-  .miners-fee-selection {
-    flex-direction: column;
-    align-items: initial;
-    span.success { display: block; }
-    label { margin-right: 15px; }
-    .fee-choices {
-      flex-direction: row;
-      margin-bottom: 10px;
-      margin-right: 0;
-      border-right: none;
-    }
-  }
-}
-
-@media (max-width: 668px) {
-  .send-actions {
-    .button-lg {
-      font-size: 1em;
-    }
-  }
-}
-
-// RECEIVE
 
 #receive {
-  @media (max-width: 768px) {
-    opacity: 1 !important;
-  }
-  @media (min-width: 769px) {
-    opacity: 1;
-    overflow: hidden;
-    @include bc-ng-animate('advanced', 'height', '225px', '375px');
-    &.sm {
-      @include bc-ng-animate('advanced', 'height', '205px', '325px');
-    }
-  }
-
   .ui-select-bootstrap > .ui-select-choices {
     max-height: 168px;
   }
-
-  .row {
-    @extend .flex-row;
-  }
-
-  h4 {
-    margin: 0 auto;
-  }
-
-  .ti-arrow-down {
-    font-weight: bold;
-    font-size: 18px;
-    color: $blue;
-  }
-
-  .column {
-    @extend .flex-column;
-    h4 {
-      margin-top: 0px;
-    }
-  }
-}
-
-.receive-code {
-  canvas {
-    display: block;
-  }
-}
-
-.split-rule {
-  width: 100%;
-  display: block;
-  text-align: center;
-  position: relative;
-  &:before, &:after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 42.5%;
-    height: 1px;
-    background-color: $ccc;
-  }
-  &:before {
-    left: 0;
-  }
-  &:after {
-    right: 0;
-  }
-}
-
-.payment-url {
-  @extend .flex;
-  > div {
-    @media (min-width: 769px) {
-      min-width: 320px;
-      &.receive-address {
-        &.max-width {
-          margin: 0 auto;
-          max-width: 320px;
-        }
+  // ff specific fix
+  @-moz-document url-prefix() {
+    .text-overflow-hidden {
+      max-width: 450px;
+      @media (max-width: 767px) {
+        max-width: 350px;
       }
     }
-  }
-  .or {
-    position: relative;
-    text-transform: uppercase;
-    &:before, &:after {
-      left: 50%;
-      width: 1px;
-      content: '';
-      height: 40%;
-      position: absolute;
-      background-color: $ccc;
-    }
-    &:before {
-      top: 0;
-    }
-    &:after {
-      bottom: 0;
-    }
-  }
-  @media (max-width: 768px) {
-    display: block;
-    > div {
-      width: 100%;
-      &.receive-address {
-        min-width: initial !important;
-        max-width: initial !important;
-      }
-    }
-    .or {
-      width: 100%;
-      display: block;
-      text-align: center;
-      margin: 1.25em auto;
-      &:before, &:after {
-        top: 50%;
-        width: 40%;
-        height: 1px;
-        left: initial;
-        right: initial;
-      }
-      &:before {
-        left: 0;
-      }
-      &:after {
-        right: 0;
-      }
-    }
-  }
-}
-
-.legacy-msg {
-  > a {
-    font-size: 14px;
-    margin-left: 2px;
   }
 }
 
@@ -381,13 +170,48 @@
   z-index: 1060;
 }
 
+.ui-select-container {
+  .divider {
+    margin: 0px auto;
+  }
+}
+
 #sign-msg {
+  @media (max-width: 767px) {
+    opacity: 1 !important;
+  }
   @media (min-width: 769px) {
     opacity: 1;
     overflow: hidden;
     @include bc-ng-animate('signature', 'height', '147px', '227px');
   }
   input {
-    border-bottom-color: $eee;
+    border-bottom-color: $border-grey;
   }
+}
+
+.form-cover {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 900;
+  background: white;
+  opacity: 0.5;
+}
+
+.form-cover-alert {
+  position: fixed;
+  right: 0;
+  left: 0;
+  z-index: 901;
+}
+
+.form-banner-alert {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 901;
 }

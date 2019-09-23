@@ -2,7 +2,7 @@ angular
   .module('walletApp')
   .controller('SettingsSecurityCenterCtrl', SettingsSecurityCenterCtrl);
 
-function SettingsSecurityCenterCtrl ($scope, Wallet, SecurityCenter, filterFilter, $uibModal) {
+function SettingsSecurityCenterCtrl ($scope, $stateParams, $timeout, Wallet, SecurityCenter, filterFilter, $uibModal) {
   $scope.security = SecurityCenter.security;
   $scope.settings = Wallet.settings;
   $scope.user = Wallet.user;
@@ -15,7 +15,9 @@ function SettingsSecurityCenterCtrl ($scope, Wallet, SecurityCenter, filterFilte
     step: 1
   };
 
-  if (Wallet.user.internationalMobileNumber.length > 4 && !Wallet.user.isMobileVerified) {
+  $scope.promptBackup = $stateParams.promptBackup;
+
+  if (Wallet.user.mobileNumber.length > 4 && !Wallet.user.isMobileVerified) {
     $scope.mobileNumber.step = 2;
   }
 
@@ -75,9 +77,11 @@ function SettingsSecurityCenterCtrl ($scope, Wallet, SecurityCenter, filterFilte
     $scope.nextAction();
   });
 
+  $timeout(() => $scope.promptBackup && $scope.toggle('securityphrase'));
+
   $scope.changeTwoFactor = () => {
     $uibModal.open({
-      templateUrl: 'partials/settings/two-factor.jade',
+      templateUrl: 'partials/settings/two-factor.pug',
       windowClass: 'bc-modal initial',
       controller: 'TwoFactorCtrl'
     });

@@ -1,24 +1,27 @@
 .settings {
-  padding: 15px 30px;
-  margin-bottom: 3em;
+  @extend .flex-column;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  height: 100%;
   .label {
     font-weight: normal;
-    margin-left: 10px;
+    margin-left: 5px;
   }
   .label-warning { background-color: $security-red; }
   .label-success { background-color: $security-green; }
-  .label-success, .label-warning {
+  .label-success,
+  .label-warning,
+  .label-default,
+  .label-primary {
     @extend .btn-xs;
     display: inline-block;
+    max-height: 20px;
   }
   h2 {
     font-size: 12pt;
   }
   .edit-mobile {
-    // Our custom CSS causes layout issues for bc-phone-number:
-    .form-control {
-      height: 33px !important;
-    }
     .caret {
       padding-left: 0px !important;
       margin-left: 0px;
@@ -32,62 +35,57 @@
   }
   table {
     th {
-      background-color: $light-grey;
+      background-color: $grey;
     }
     td, th {
       border: 1px solid $border-grey;
       padding: 10px;
     }
   }
+
+  .settings-category {
+    overflow: scroll;
+    height: 100%;
+    padding: 15px 30px;
+  }
+
   // Preferences
-  form.form-horizontal {
+  .clearfix {
     .form-group {
-      margin: 0!important;
-      border-bottom: 1px solid $grey;
-      padding: 20px 0;
-      &:hover { background: $hover-blue; }
-      .button-primary {
-        display: inline-block;
-      }
-      @media(max-width: 992px) {
+      @media(max-width: 991px) {
         .setting-result {
           clear: left;
         }
       }
     }
   }
-  .account-container {
-    .dropdown-menu {
-      left: auto !important;
-      right: 0px !important;
-      > li > a {
-        font-size: small;
-        &:before {
-          @extend .prm;
-        }
-      }
-    }
-  }
   // Accounts & Addresses
-  @media (max-width: 768px) {
+  @media (max-width: 991px) {
     .accounts-container {
       width: 100%;
       tr {
         height: auto;
         display: block;
         position: relative;
+        border-bottom: 1px solid $grey;
         td {
           border: 0px;
           padding: 0px;
           display: block;
           margin: 10px 0;
-          button { 
-            display: block;
-            margin-top: 10px;
-          }
           &:first-child {
+            float: left;
             padding-top: 10px;
-            border-top: 1px solid $grey;
+            > span:first-child {
+              display: block;
+            }
+          }
+          &:nth-child(2):not(.address-label) {
+            float: right;
+            padding-top: 10px;
+          }
+          &:last-child {
+            clear: both;
           }
         }
       }
@@ -95,41 +93,90 @@
   }
 }
 
-.setting-result {
-  p { margin-top: 15px; }
-}
-
 .inneredit { padding: 10px 15px 0;}
 
 table.accounts-container {
-
+  margin-bottom: 40px;
   tr {
-    height: 66px;
+    height: 80px;
+    &:first-child td {
+      border-top: 0px;
+    }
+    &:last-child td {
+      border-bottom: 0px;
+    }
+    &.short {
+      height: 40px;
+    }
   }
 
   td {
+    padding-left: 0px;
     border-left: none;
     border-right: none;
     border-top: 1px solid $grey;
     border-bottom: 1px solid $grey;
+    &.center {
+      > span {
+        min-width: 100px;
+      }
+    }
   }
 
-  .account-label {
-    font-size: 12pt;
-    font-weight: 500;
+  @media (min-width: 992px) {
+    &.addresses {
+      td:first-child,
+      td:last-child, {
+        padding: 10px 25px;
+      }
+      td:first-child {
+        border-left: 1px solid $grey;
+      }
+      td:last-child {
+        border-right: 1px solid $grey;
+      }
+      tr:first-child td {
+        border-top: 1px solid $grey;
+      }
+      tr:last-child td {
+        border-bottom: 1px solid $grey;
+      }
+    }
   }
 
-  .label-primary {
-    background-color: $blue;
-    display: inline-block;
-    @extend .btn-xs;
-    color: white;
-  }
+  @media (max-width: 991px) {
+    tr {
+      height: 80px;
+      &:before {
+        content: '';
+        display: table;
+      }
+      &:after {
+        clear: both;
+        content: '';
+        display: table;
+      }
+    }
 
-  &.imported-addresses{
-    color: $mid-grey;
+    &.addresses {
+      tr {
+        padding-left: 15px;
+        padding-right: 15px;
+        border-left: 1px solid $grey;
+        border-right: 1px solid $grey;
+        &:first-child {
+          height: 40px;
+          border-top: 1px solid $grey;
+          td {
+            padding-top: 0px;
+          }
+        }
+        &:not(:first-child) td:last-child {
+          padding-bottom: 10px;
+        }
+      }
+    }
   }
-
 }
 
 .intl-tel-input { margin-bottom: 10px; }
@@ -138,10 +185,30 @@ table.accounts-container {
 .well {
   padding: 15px;
   margin-bottom: 20px;
-  background-color: $pale-yellow;
-  border-left: 5px solid $security-yellow;
+  background-color: $moccasin;
+  border-left: 5px solid $dandelion;
   line-height: 1.5em;
   font-size: 1.1em;
+}
+
+.well.friendly {
+  background-color: $light-blue;
+  border-left: 5px solid $blue;
+}
+
+div.well {
+  margin-bottom: 0px;
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+div.well.small {
+  font-size: 12px;
+  padding: 10px;
+}
+
+.setting-result {
+  @extend .prn;
 }
 
 @media (min-width: 992px){
@@ -161,33 +228,48 @@ table.accounts-container {
 }
 
 .settings {
-  td.hd-label {
-    height: 44px;
-    > span {
-      display: inline-block;
-      border-bottom: 1px solid transparent;
+  .form-group {
+    .col-sm-12 {
+      padding: 0px;
     }
-    form[name="bcAsyncForm"] {
-      > div {
-        @extend .flex-row;
-        @extend .flex-center;
-        @extend .flex-between;
-        > div:first-child {
-          @extend .flex-1;
-        }
-        input {
-          font-weight: normal;
-          margin-bottom: 1px;
-          font-size: small;
-          display: block;
-        }
-        button {
-          padding: 0px;
-        }
-        button.button-primary {
-          padding: 2px 4px;
-        }
+  }
+  form[name="bcAsyncForm"] {
+    > div {
+      @extend .flex-row;
+      @extend .flex-center;
+      @extend .flex-between;
+      > div:first-child {
+        @extend .flex-1;
+      }
+      input {
+        font-weight: normal;
+        margin-bottom: 0px;
+        font-size: small;
+        display: block;
+        width: 90%;
+      }
+      button {
+        padding: 0px;
+      }
+      button.button-primary {
+        padding: 2px 4px;
       }
     }
+  }
+}
+
+.account-settings {
+  position: relative;
+}
+
+@media (max-width: 767px) {
+  .settings-category {
+    padding: 15px 15px;
+  }
+}
+
+@media (max-width: 767px) {
+  .pbm-m {
+    padding-bottom: 0.625em;
   }
 }

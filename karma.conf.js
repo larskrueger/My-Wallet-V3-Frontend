@@ -7,14 +7,16 @@ module.exports = function (config) {
 
     client: { captureConsole: false },
 
-    exclude: ['assets/js/my_wallet/'],
+    exclude: [],
 
     files: [
-      'build/js/polyfill.js',
+      'node_modules/babel-polyfill/dist/polyfill.js',
+      'node_modules/jasmine-es6-promise-matchers/jasmine-es6-promise-matchers.js',
       'bower_components/angular/angular.js',
       'bower_components/angular-sanitize/angular-sanitize.js',
       'bower_components/angular-mocks/angular-mocks.js',
       'bower_components/angular-animate/angular-animate.js',
+      'bower_components/oclazyload/dist/ocLazyLoad.js',
       'bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
       'bower_components/angular-cookies/angular-cookies.js',
       'bower_components/angular-ui-select/dist/select.js',
@@ -23,48 +25,56 @@ module.exports = function (config) {
       'bower_components/angular-qr/angular-qr.min.js',
       'bower_components/angular-inview/angular-inview.js',
       'bower_components/browserdetection/src/browser-detection.js',
-      'assets/js/app.js',
-      'assets/js/core/core.module.js',
+      'bower_components/compare-versions/index.js',
+      'bower_components/ng-file-upload/ng-file-upload.min.js',
+      'bower_components/angular-local-storage/dist/angular-local-storage.min.js',
+      'assets/js/shared.module.js',
+      'assets/js/walletDirectives.js',
+      'assets/js/sharedServices/*.service.js',
+      'assets/js/sharedDirectives/*.directive.js',
+      'tests/wallet-app.module.spec.js',
+      'assets/js/landingCtrl.js',
+      'assets/js/core/wallet-app.core.module.js',
       'build/js/templates.js',
       'assets/js/controllers/**/*.controller.js',
-      'assets/js/filters.js',
+      'assets/js/components/**/*.component.js',
+      'assets/js/wallet-filters.module.js',
+      'assets/js/filters/*.js',
       'assets/js/services/**/*.service.js',
       'assets/js/directives/*.directive.js',
+      'assets/js/constants/**/*.constant.js',
+      'assets/js/wallet-lazy-load.module.js',
       'assets/js/core/*.js',
-      'tests/filters/*.coffee',
-      'tests/controllers/*.coffee',
-      'tests/directives/*.coffee',
-      'tests/mocks/**/*.coffee',
+      'tests/filters/*.js',
+      'tests/controllers/**/*.js',
+      'tests/components/*.js',
+      'tests/services/**/*.js',
+      'tests/directives/*.js',
+      'tests/mocks/**/*.js',
       'tests/**/*.js',
-      'app/templates/*.jade',
-      'bower_components/angular-password-entropy/password-entropy.js'
+      'app/templates/*.pug'
     ],
 
     autoWatch: true,
 
     preprocessors: {
-      '**/*.jade': ['ng-jade2js'],
-      'assets/js/core/core.module.js': ['babel'],
+      '**/*.pug': ['ng-pug2js'],
+      'assets/js/core/wallet-app.core.module.js': ['babel'],
       'assets/js/controllers/**/*.js': ['coverage', 'babel'],
-      'assets/js/filters.js': ['babel', 'coverage'],
+      'assets/js/components/**/*.js': ['coverage', 'babel'],
+      'assets/js/wallet-filters.module.js': ['babel', 'coverage'],
+      'assets/js/filters/*.filter.js': ['babel', 'coverage'],
       'assets/js/services/*.service.js': ['babel', 'coverage'],
       'assets/js/directives/*.directive.js': ['babel', 'coverage'],
+      'assets/js/shared.module.js': ['babel'],
+      'assets/js/walletDirectives.js': ['babel'],
+      'assets/js/sharedServices/*.service.js': ['babel', 'coverage'],
+      'assets/js/sharedDirectives/*.directive.js': ['babel', 'coverage'],
       'assets/js/core/*.service.js': ['babel'],
       'assets/js/routes.js': ['babel', 'coverage'],
-      'assets/js/app.js': ['babel'],
-      'tests/**/*.coffee': ['coffee'],
+      'assets/js/wallet-app.module.js': ['babel'],
+      'assets/js/landingCtrl.js': ['babel', 'coverage'],
       'tests/**/*.js': ['babel']
-    },
-    coffeePreprocessor: {
-      // options passed to the coffee compiler
-      options: {
-        bare: true,
-        sourceMap: true
-      },
-      // transforming the filenames
-      transformPath: function (path) {
-        return path.replace(/\.coffee$/, '.js');
-      }
     },
     babelPreprocessor: {
       options: {
@@ -78,7 +88,7 @@ module.exports = function (config) {
         return file.originalPath;
       }
     },
-    ngJade2JsPreprocessor: {
+    ngPug2JsPreprocessor: {
       stripPrefix: 'app/',
       prependPrefix: '',
 
@@ -88,7 +98,7 @@ module.exports = function (config) {
       //   return null;
       // },
 
-      // Support for jade locals to render at compile time
+      // Support for pug locals to render at compile time
       // locals: {
       //   foo: 'bar'
       // },
@@ -99,13 +109,21 @@ module.exports = function (config) {
       // from all the files, so you can load them all with module('foo')
       // moduleName: 'foo',
 
-      // Jade compiler options. For a list of possible options, consult Jade documentation.
-      jadeOptions: {
+      // Pug compiler options. For a list of possible options, consult Pug documentation.
+      pugOptions: {
         doctype: 'xml'
       }
     },
 
-    frameworks: ['jasmine'],
+    browserify: {
+      debug: true,
+      transform: [
+        'babelify',
+        ['browserify-istanbul', { instrumenter: require('isparta') }]
+      ]
+    },
+
+    frameworks: ['jasmine', 'browserify'],
 
     browsers: ['PhantomJS'],
 
@@ -113,19 +131,11 @@ module.exports = function (config) {
 
     coverageReporter: {
       reporters: [
-        // Fails with: TypeError: Cannot read property 'text' of undefined
-        // { type : 'html', dir : 'coverage/'},
+        {type: 'html', dir: 'coverage/'},
         {type: 'lcovonly', dir: 'coverage-lcov/'}
       ],
 
-      subdir: '.',
-
-      instrumenters: {isparta: require('isparta')},
-
-      instrumenter: {
-        '**/*.js': 'isparta'
-      }
-
+      subdir: '.'
     }
   };
 

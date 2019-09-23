@@ -1,6 +1,6 @@
 
 angular
-  .module('walletApp')
+  .module('walletDirectives')
   .directive('transactionNote', transactionNote);
 
 function transactionNote ($translate, $rootScope, Wallet) {
@@ -8,9 +8,15 @@ function transactionNote ($translate, $rootScope, Wallet) {
     restrict: 'E',
     replace: false,
     scope: {
-      transaction: '='
+      setNote: '&',
+      deleteNote: '&',
+      transaction: '=',
+      account: '=',
+      search: '=',
+      label: '=',
+      note: '='
     },
-    templateUrl: 'templates/transaction-note.jade',
+    templateUrl: 'templates/transaction-note.pug',
     link: link
   };
   return directive;
@@ -19,35 +25,26 @@ function transactionNote ($translate, $rootScope, Wallet) {
     scope.editNote = false;
 
     scope.cancelEditNote = () => {
-      scope.transaction.draftNote = '';
+      scope.draftNote = '';
       scope.editNote = false;
     };
 
     scope.startEditNote = () => {
-      if (scope.transaction.note) scope.transaction.draftNote = scope.transaction.note;
+      if (scope.note) scope.draftNote = scope.note;
       scope.editNote = true;
     };
 
     scope.saveNote = () => {
-      scope.transaction.note = scope.transaction.draftNote;
+      scope.note = scope.draftNote;
       scope.editNote = false;
+      scope.setNote({note: scope.note});
     };
 
-    scope.deleteNote = () => {
-      scope.transaction.note = null;
+    scope.removeNote = () => {
+      scope.draftNote = '';
+      scope.note = null;
       scope.editNote = false;
+      scope.deleteNote();
     };
-
-    scope.$watch('transaction.note', (newVal, oldVal) => {
-      if (scope.transaction != null) {
-        scope.transaction.draftNote = '';
-      }
-      if ((newVal == null || newVal === '') && (oldVal != null) && oldVal !== '') {
-        Wallet.deleteNote(scope.transaction);
-      }
-      if (newVal != null && newVal !== oldVal && newVal !== '') {
-        Wallet.setNote(scope.transaction, scope.transaction.note);
-      }
-    });
   }
 }

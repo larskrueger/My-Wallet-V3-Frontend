@@ -6,23 +6,40 @@ angular
 format.$inject = [];
 
 function format () {
+  let defineIn = obj => (prop, get) => (
+    Object.defineProperty(obj, prop, { configurable: false, get })
+  );
+
   const service = {
     origin: originDestination,
-    destination: originDestination
+    destination: originDestination,
+    addressBook: addressBook
   };
 
   return service;
 
   function originDestination (o) {
-    const formatted = {
+    let formatted = {
       label: o.label || o.address,
       index: o.index,
-      address: o.address,
-      balance: o.balance,
-      archived: o.archived
+      address: o.address
     };
-    formatted.type = o.index != null ? '' : 'Imported Addresses';
+
+    let def = defineIn(formatted);
+    def('balance', () => o.balance);
+    def('archived', () => o.archived);
+
+    formatted.type = o.index != null ? 'Accounts' : 'Imported Addresses';
     if (o.index == null) formatted.isWatchOnly = o.isWatchOnly;
+    else formatted.xpub = o.extendedPublicKey || o.xpub;
     return formatted;
+  }
+
+  function addressBook (o) {
+    return {
+      label: o.label,
+      address: o.address,
+      type: 'Address Book'
+    };
   }
 }
